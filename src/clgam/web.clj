@@ -1,18 +1,19 @@
 (ns clgam.web
   (:use ring.adapter.jetty)
   (:use net.cgrand.enlive-html)
-  (:use net.cgrand.moustache [:only app]))
+  (:use [net.cgrand.moustache :only [app]])
+  (:use ring.middleware.file)
+  )
 
-
-
-(defn handler [req]
-  {:status  200
-   :headers {"Content-Type" "text/html"}
-   :body    "Hello World from Ring"})
+(def ruter (app
+	    (wrap-file "src/webstatic")
+	    [""] {:status 404
+		 :body "Page Not Found"}))
 
 (defn boot []
-  (run-jetty #'handler {:port 8080}))
+  (run-jetty #'ruter {:port 7079}))
 
 (comment
-(defonce server (run-jetty #'handler {:port 8080 :join false}))
+(defonce server (run-jetty #'ruter {:port 7079 :join false}))
 )
+
