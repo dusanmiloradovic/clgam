@@ -1,6 +1,7 @@
 (ns clgam.web
   (:use ring.adapter.jetty)
-  (:use net.cgrand.enlive-html))
+  (:use net.cgrand.enlive-html)
+  (:use net.cgrand.moustache [:only app]))
 
 
 
@@ -12,4 +13,6 @@
 (defn boot []
   (run-jetty #'handler {:port 8080}))
 
+(comment
 (defonce server (run-jetty #'handler {:port 8080 :join false}))
+)
