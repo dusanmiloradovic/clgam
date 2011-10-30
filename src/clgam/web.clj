@@ -16,7 +16,10 @@
 (set-connection! mongocon)
 
 (defn get-mongo-file[path]
-  (stream-from :testaj (construct-url path)))
+  (stream-from :testaj
+               (fetch-one-file :testaj :where
+                               {:filename (construct-url path)}
+                               )))
 
 (def ruter (app
 (wrap-file "src/webstatic")
