@@ -8,6 +8,16 @@
   )
 (comment	    (wrap-file "src/webstatic"))
 
+(defn construct-url [url]
+  (str-join "/" url))
+
+(defonce mongocon (make-connection "testaj"))
+
+(set-connection! mongocon)
+
+(defn get-mongo-file[path]
+  (stream-from :testaj (construct-url path)))
+
 (def ruter (app
 (wrap-file "src/webstatic")
 ["nosa"]
@@ -35,17 +45,10 @@
 (defonce server (run-jetty #'ruter {:port 7079 :join false}))
 )
 
-(defn construct-url [url]
-  (str-join "/" url))
-
-(defonce mongocon (make-connection "testaj"))
-
-(set-connection! mongocon)
 
 (def fs (get-gridfs "testaj"))
 
-(defn get-mongo-file[path]
-  (stream-from "testaj" (construct-url path)))
+
   
   
 
