@@ -36,8 +36,9 @@
 	    ["mongoize" & putanja]
 	    (fn[req]
 	      (if-let [f (get-mongo-file putanja)]
-		({:status 200 :body f})
-		({:status 400})))
+		{:status 200 :body f}
+		{:status 400}
+		))
 	    [&]
 	    (fn[req] 
 	      {:status 400 
