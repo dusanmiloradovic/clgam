@@ -7,7 +7,6 @@
   (:use  [clojure.contrib.str-utils :only [str-join]])
   (:use somnium.congomongo)
   )
-(comment	    (wrap-file "src/webstatic"))
 
 (defn construct-url [url]
   (str-join "/" url))
@@ -17,30 +16,33 @@
 (set-connection! mongocon)
 
 (defn get-mongo-file[path]
+  (println path)
   (stream-from :fs
                (fetch-one-file :fs :where
                                {:filename (construct-url path)}
                                )))
 
 (def ruter (app
-	    (wrap-content-type)
 	    (wrap-file "src/webstatic")
+    	    (wrap-content-type)
 	    ["nosa"]
-	    (fn[req] 
-	      {:status 200 
+	    (fn[req]
+	      {:status 200
+	       :headers {"Content-Type" "text/html"}
 	       :body    "Testic"})
 	    ["mosa"]
-	    (fn[req] 
-	      {:status 200 
+	    (fn[req]
+	      {:status 200
+	       :headers {"Content-Type" "text/html"}
 	       :body    "Testic?"})
 	    ["mongoize" & putanja]
 	    (fn[req]
 	      (if-let [f (get-mongo-file putanja)]
 		{:status 200 :body f}
-		{:status 400}
+		{:status 404 :headers {"Content-Type" "text/html"} :body "Greska"}
 		))
 	    [&]
-	    (fn[req] 
+	    (fn[req]
 	      {:status 400 
 	       :body    "Not found?"})
 	    ))
