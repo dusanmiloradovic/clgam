@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Ajax With Jquery and Clojure</title>
+   
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+
+        $(document).ready(function(){
+            $('#txtValue').keyup(function(){
+                sendValue($(this).val());  
+               
+            });
+           
+        });
+        function sendValue(str){
+            $.post("ajax/test/"+str, {name:"Dusan", surname:"Miloradovic"},
+            function(data){
+                $('#display').html(data);
+            },"html");
+           
+        }
+       
+    </script>
+</head>
+   
+
+<body>
+   
+    <label for="txtValue">Enter a value : </label>
+    <input type="text" name="txtValue" value="" id="txtValue">
+   
+    <div id="display"></div>
+   
+</body>
+</html>

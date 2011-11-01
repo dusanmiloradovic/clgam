@@ -41,6 +41,13 @@
 		{:status 200 :body f}
 		{:status 404 :headers {"Content-Type" "text/html"} :body "Greska"}
 		))
+	    ["ajax" & putanja]
+	    (fn[req]
+	      	    (println (slurp(:body req)))
+	      {:status 200
+       	       :headers {"Content-Type" "text/html"}
+	       :body (str "<html>" (apply str putanja) "</html>")})
+		       
 	    [&]
 	    (fn[req]
 	      {:status 400 
