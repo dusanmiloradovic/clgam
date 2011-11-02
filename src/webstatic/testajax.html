@@ -13,6 +13,9 @@
                 sendValue($(this).val());  
                
             });
+	$('#brdimg').click(function(){
+	sendCoords($(this));
+	});
            
         });
         function sendValue(str){
@@ -22,6 +25,34 @@
             },"html");
            
         }
+	jQuery.fn.elementlocation = function() {
+	var curleft = 0;
+	var curtop = 0;
+	
+	var obj = this;
+	
+	do {
+	curleft += obj.attr('offsetLeft');
+	curtop += obj.attr('offsetTop');
+	
+	obj = obj.offsetParent();
+	} while ( obj.attr('tagName') != 'BODY' );
+	
+	
+	return ( {x:curleft, y:curtop} );
+	};
+	
+	function sendCoords(eventObj){
+	var location = $('#brdimg').elementlocation();
+	var x = eventObj.pageX - location.x;
+	var y = eventObj.pageY - location.y;
+	var dsstr='x:'+x+', y:'+y;
+	$.post("ajax/test/"+dsstr, {name:"Dusan", surname:"Miloradovic"},
+            function(data){
+                $('#display').html(data);
+            },"html");
+           
+	}
        
     </script>
 </head>
@@ -33,6 +64,10 @@
     <input type="text" name="txtValue" value="" id="txtValue">
    
     <div id="display"></div>
+    <div id="igra" >
+      <img id="brdimg" src="img/tabla.jpg" />
+      </div>
+
    
 </body>
 </html>
