@@ -6,55 +6,8 @@
     <title>Ajax With Jquery and Clojure</title>
    
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript" charset="utf-8"></script>
-    <script type="text/javascript" charset="utf-8">
+    <script src="js/dusan.js" type="text/javascript" charset="utf-8" > </script>
 
-        $(document).ready(function(){
-            $('#txtValue').keyup(function(){
-                sendValue($(this).val());  
-               
-            });
-	$('#brdimg').click(function(){
-	sendCoords($(this));
-	});
-           
-        });
-        function sendValue(str){
-            $.post("ajax/test/"+str, {name:"Dusan", surname:"Miloradovic"},
-            function(data){
-                $('#display').html(data);
-            },"html");
-           
-        }
-	jQuery.fn.elementlocation = function() {
-	var curleft = 0;
-	var curtop = 0;
-	
-	var obj = this;
-	
-	do {
-	curleft += obj.attr('offsetLeft');
-	curtop += obj.attr('offsetTop');
-	
-	obj = obj.offsetParent();
-	} while ( obj.attr('tagName') != 'BODY' );
-	
-	
-	return ( {x:curleft, y:curtop} );
-	};
-	
-	function sendCoords(eventObj){
-	var location = $('#brdimg').elementlocation();
-	var x = eventObj.pageX - location.x;
-	var y = eventObj.pageY - location.y;
-	var dsstr='x:'+x+', y:'+y;
-	$.post("ajax/test/"+dsstr, {name:"Dusan", surname:"Miloradovic"},
-            function(data){
-                $('#display').html(data);
-            },"html");
-           
-	}
-       
-    </script>
 </head>
    
 
