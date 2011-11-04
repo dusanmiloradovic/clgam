@@ -25,6 +25,8 @@ nil
     )))
 
 
+
+
 (defn tictactoeboard[koord]
   (and   (<= 0 (:xcoord koord)) (> 3 (:xcoord koord))
 	 (<= 0 (:ycoord koord)) (> 3 (:ycoord koord))
@@ -259,5 +261,14 @@ nil
 				     [~@labls]
 				     [~@displayed]))))))
 
-
+(def boards
+  {:tictactoe [3 3],
+   :go [19 19]})
  
+(defn transfer-board-koords[x y game]
+  (let [[xb yb] (boards (keyword game))]
+        [(int (* x xb)) (int (* y yb))]
+       ))
+  
+  
+  

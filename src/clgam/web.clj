@@ -4,8 +4,10 @@
   (:use [net.cgrand.moustache :only [app]])
   (:use ring.middleware.file)
   (:use ring.middleware.content-type)
+  (:use ring.middleware.params)
   (:use  [clojure.contrib.str-utils :only [str-join]])
   (:use somnium.congomongo)
+  (:require  [clgam.core :as c])
   )
 
 (defn construct-url [url]
@@ -21,7 +23,13 @@
                (fetch-one-file :fs :where
                                {:filename (construct-url path)}
                                )))
-
+(defn tictactoehandler [{params :params}]
+  (let [[x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])]
+    (println (params "xcoord"))
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (str "<html>" (clojure.string/join "," (c/transfer-board-koords x y "tictactoe")) "</html>")}
+    ))
 (def ruter (app
 	    (wrap-file "src/webstatic")
     	    (wrap-content-type)
@@ -30,24 +38,21 @@
 	      {:status 200
 	       :headers {"Content-Type" "text/html"}
 	       :body    "Testic"})
-	    ["mosa"]
-	    (fn[req]
-	      {:status 200
-	       :headers {"Content-Type" "text/html"}
-	       :body    "Testic?"})
 	    ["mongoize" & putanja]
 	    (fn[req]
 	      (if-let [f (get-mongo-file putanja)]
 		{:status 200 :body f}
 		{:status 404 :headers {"Content-Type" "text/html"} :body "Greska"}
 		))
-	    ["ajax" & putanja]
+            ["tictactoe"]
+            (wrap-params tictactoehandler)
+            ["ajax" & putanja]
 	    (fn[req]
-	      	    (println (slurp(:body req)))
+              (println (slurp(:body req)))
 	      {:status 200
        	       :headers {"Content-Type" "text/html"}
 	       :body (str "<html>" (apply str putanja) "</html>")})
-		       
+            
 	    [&]
 	    (fn[req]
 	      {:status 400 
