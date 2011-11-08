@@ -1,4 +1,3 @@
-
 $(document).ready(function(){
 	$('#txtValue').keyup(function(){
                 sendValue($(this).val());  
@@ -27,6 +26,9 @@ function sendCoords(e,t){
     var y=e.pageY - t.offset().top;
     $.post("tictactoe",{xcoord:x/$.board.xsize, ycoord:y/$.board.ysize},
 	   function (data){
-	       $('#display').html(data);
-	   },"html");
+	       var xField=jQuery.parseJSON(data).xfield;
+       	       var yField=jQuery.parseJSON(data).yfield;
+	       $("#igra_"+xField+"_"+yField).remove();
+	       $("<div id="+xField+"_"+yField+"> <img id='figimg' src='img/figura.jpg' /> </div>").insertAfter("brdimg");
+	   });
 }

@@ -1,26 +1,39 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+	  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-<head>
+  <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+      #igra
+      {
+      position:relative;
+      left:120px;
+      }
+      #testfigura
+      {
+      position:absolute;
+      left:60px;
+      top:30px;
+      z-index:1;
+      }
+    </style>
     <title>Ajax With Jquery and Clojure</title>
-   
+    
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/dusan.js" type="text/javascript" charset="utf-8" > </script>
 
-</head>
-   
+  </head>
+  
 
-<body>
-   
+  <body>
+    
     <label for="txtValue">Enter a value : </label>
     <input type="text" name="txtValue" value="" id="txtValue">
-   
-    <div id="display"></div>
-    <div id="igra" >
-      <img id="brdimg" src="img/tabla.jpg" />
+      
+      <div id="display"></div>
+      <div id="igra" >
+	<img id="brdimg" src="img/tabla.jpg" />
+	</div>
       </div>
-
-   
-</body>
-</html>
+    </body>
+  </html>

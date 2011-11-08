@@ -8,6 +8,7 @@
   (:use  [clojure.contrib.str-utils :only [str-join]])
   (:use somnium.congomongo)
   (:require  [clgam.core :as c])
+  (:require [clojure.contrib.json :as j])
   )
 
 (defn construct-url [url]
@@ -28,7 +29,7 @@
     (println (params "xcoord"))
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (str "<html>" (clojure.string/join "," (c/transfer-board-koords x y "tictactoe")) "</html>")}
+     :body (j/json-str (c/transfer-board-koords x y "tictactoe"))}
     ))
 (def ruter (app
 	    (wrap-file "src/webstatic")

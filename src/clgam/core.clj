@@ -267,7 +267,7 @@ nil
  
 (defn transfer-board-koords[x y game]
   (let [[xb yb] (boards (keyword game))]
-        [(int (* x xb)) (int (* y yb))]
+        {:xfield (int (* x xb)) , :yfield (int (* y yb))}
        ))
   
   
