@@ -28,7 +28,7 @@ function sendCoords(e,t){
 	   function (data){
 	       var xField=jQuery.parseJSON(data).xfield;
        	       var yField=jQuery.parseJSON(data).yfield;
-	       $("#igra_"+xField+"_"+yField).remove();
-	       $("<div id="+xField+"_"+yField+"> <img id='figimg' src='img/figura.jpg' /> </div>").insertAfter("brdimg");
+	       $("#polje_"+xField+"_"+yField).remove();
+	       $("#igra").append("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' src='img/figura.jpg' /> </div>");
 	   });
 }
