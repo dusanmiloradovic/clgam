@@ -30,7 +30,6 @@ function sendCoords(e,t){
        	       var yField=jQuery.parseJSON(data).yfield;
 	       var xDraw=(xField+0.5)* ($.board.xsize/3);
 	       var yDraw=(yField+0.5)* ($.board.ysize/3);
-	       alert(xDraw+';;;;'+$.board.xsize);
 	       $("#polje_"+xField+"_"+yField).remove();
 
 	       $("#igra").append($("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' src='img/figura.jpg' /> </div>").css(
