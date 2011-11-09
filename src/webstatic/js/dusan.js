@@ -24,12 +24,15 @@ function sendValue(str){
 function sendCoords(e,t){
     var x=e.pageX - t.offset().left;
     var y=e.pageY - t.offset().top;
+    alert (t.offset().left);
     $.post("tictactoe",{xcoord:x/$.board.xsize, ycoord:y/$.board.ysize},
 	   function (data){
 	       var xField=jQuery.parseJSON(data).xfield;
        	       var yField=jQuery.parseJSON(data).yfield;
 	       var xDraw=(xField+0.5)* ($.board.xsize/3);
 	       var yDraw=(yField+0.5)* ($.board.ysize/3);
+	       xDraw=0;
+	       yDraw=0;
 	       $("#polje_"+xField+"_"+yField).remove();
 
 	       $("#igra").append($("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' src='img/figura.jpg' /> </div>").css(
