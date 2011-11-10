@@ -6,6 +6,7 @@
 		 [enlive "1.0.0"]
 		 [congomongo "0.1.7"]
 		 [net.cgrand/moustache "1.1.0"]
+                 [aleph "0.2.0-rc1"]
 		 ]
   :dev-dependencies [[swank-clojure "1.2.1"]
 		     ]
