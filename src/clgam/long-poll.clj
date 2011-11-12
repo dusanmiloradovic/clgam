@@ -1,12 +1,41 @@
 (ns clgam.long-poll
-    (:use aleph.core lamina.core aleph.http)
-  )
-(defn long-poll-handler [ch request]
-  (receive (named-channel (:body request))
-           #(enqueue ch
-                     {:status 200
-                      :headers {"content-type" "text/plain"}
-                      :body %}))
+  (:use aleph.core lamina.core aleph.http)
+  (:use [net.cgrand.moustache :only [app]])
+  (:use ring.middleware.file)
+  (:use ring.middleware.file-info)
+  (:use ring.middleware.content-type)
+  (:use ring.middleware.params)
+  (:use  [clojure.contrib.str-utils :only [str-join]])
   )
 
-(start-http-server long-poll-handler {:port 8080})
+(def ulazniq (channel))
+(defn fillq [{params :params}]
+  do
+  (
+   (enqueue ulazniq (params "val"))
+   (receive-all ulazniq (fn [_]))
+   )
+  {:status 200
+   :headers {"content-type" "text/plain"}
+   :body ""}
+  )
+
+
+(defn long-poll-handler [ch request]
+   (siphon
+    (map* (fn[x] {:status 200, :headers {"content-type" "text/plain"}, :body x}) (fork ulazniq))
+    ch))
+(def ruter (app
+            (wrap-file-info)
+            (wrap-file "src/webstatic")
+            (wrap-content-type)
+            ["queuein"] (wrap-params fillq)
+            ["nosa"]
+            (fn[req]
+	      {:status 200
+	       :headers {"Content-Type" "text/html"}
+	       :body    "Testic"})
+            ["poll"]
+            (wrap-params (wrap-aleph-handler long-poll-handler))
+            ))
+(def stop (start-http-server (wrap-ring-handler ruter) {:port 8080}))
