@@ -19,18 +19,7 @@
    :body ""}
   )
 
-(comment
-  (defn fillq [{params :params}]
-  (when (not (closed? ulazniq))
-   (enqueue ulazniq (params "val"))
-  {:status 200
-   :headers {"content-type" "text/plain"}
-   :body ""}
-  ))
-  )
-
 (receive-all ulazniq (fn[x] (println "praznim" x)))
-
 
 (defn long-poll-handler [ch request]
   (when (not (closed? ch))
@@ -45,11 +34,6 @@
             (wrap-file "src/webstatic")
             (wrap-content-type)
             ["queuein"] (wrap-params fillq)
-            ["nosa"]
-            (fn[req]
-	      {:status 200
-	       :headers {"Content-Type" "text/html"}
-	       :body    "Testic"})
             ["poll"]
             (wrap-params (wrap-aleph-handler long-poll-handler))
             ))
