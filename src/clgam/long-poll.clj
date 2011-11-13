@@ -10,15 +10,14 @@
 
 (def ulazniq (channel))
 (defn fillq [{params :params}]
-  do
-  (
+  (when (not (closed? ulazniq))
    (enqueue ulazniq (params "val"))
-   (receive-all ulazniq (fn [_]))
-   )
   {:status 200
    :headers {"content-type" "text/plain"}
    :body ""}
-  )
+  ))
+
+(receive-all ulazniq (fn[x] (println "praznim" x)))
 
 
 (defn long-poll-handler [ch request]
