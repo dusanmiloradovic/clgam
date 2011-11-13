@@ -9,21 +9,37 @@
   )
 
 (def ulazniq (channel))
+
 (defn fillq [{params :params}]
+  (let [val (params "val")]
+     (enqueue ulazniq val)
+    )
+    {:status 200
+   :headers {"content-type" "text/plain"}
+   :body ""}
+  )
+
+(comment
+  (defn fillq [{params :params}]
   (when (not (closed? ulazniq))
    (enqueue ulazniq (params "val"))
   {:status 200
    :headers {"content-type" "text/plain"}
    :body ""}
   ))
+  )
 
 (receive-all ulazniq (fn[x] (println "praznim" x)))
 
 
 (defn long-poll-handler [ch request]
-   (siphon
-    (map* (fn[x] {:status 200, :headers {"content-type" "text/plain"}, :body x}) (fork ulazniq))
-    ch))
+  (when (not (closed? ch))
+    (async
+     (receive (fork ulazniq)
+	      (fn[x]
+		(enqueue ch
+			 {:status 200, :headers {"content-type" "text/plain"}, :body x}))))))
+
 (def ruter (app
             (wrap-file-info)
             (wrap-file "src/webstatic")
@@ -37,4 +53,5 @@
             ["poll"]
             (wrap-params (wrap-aleph-handler long-poll-handler))
             ))
+
 (def stop (start-http-server (wrap-ring-handler ruter) {:port 8080}))
