@@ -34,13 +34,13 @@ function addmsg(type, msg){
         });
     };
 
-    $(document).ready(function(){
-	    	$('#submit').click(function(e){
-			sendValue($('#tekstic').val());
-	    });
-
-        waitForMsg(); /* Start the inital request */
+$(document).ready(function(){
+    $("form").submit(function() {
+	sendValue($('#tekstic').val());
+	return false;
     });
+		     waitForMsg(); /* Start the inital request */
+		    });
 
 function sendValue(str){
     $.post("queuein", {val:str});
