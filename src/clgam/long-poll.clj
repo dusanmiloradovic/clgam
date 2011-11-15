@@ -1,3 +1,4 @@
+
 (ns clgam.long-poll
   (:use aleph.core lamina.core aleph.http)
   (:use [net.cgrand.moustache :only [app]])
@@ -6,9 +7,34 @@
   (:use ring.middleware.content-type)
   (:use ring.middleware.params)
   (:use  [clojure.contrib.str-utils :only [str-join]])
+  (:require  [clgam.core :as c])
+  (:require [clojure.contrib.json :as j])
   )
 
 (def ulazniq (channel))
+
+(def coords_inq (channel))
+(receive-all coords_inq (fn[_]))
+
+(defn tictactoehandler_in [{params :params}]
+  (let [[x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])]
+    (enqueue coords_inq (j/json-str (c/transfer-board-koords x y "tictactoe")))
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body ""}
+    ))
+
+
+(defn longpoll [ch q]
+  "common function for all long poll requests"
+  (when (not (closed? ch))
+     (receive (fork q)
+	      (fn[x]
+		(enqueue ch
+			 {:status 200, :headers {"content-type" "text/plain"}, :body x})))))
+
+(defn tictactoehandler_out [ch request]
+  (longpoll ch coords_inq))
 
 (defn fillq [{params :params}]
   (let [val (params "val")]
@@ -21,13 +47,11 @@
 
 (receive-all ulazniq (fn[x] (println "praznim" x)))
 
+
+
 (defn long-poll-handler [ch request]
-  (when (not (closed? ch))
-    (async
-     (receive (fork ulazniq)
-	      (fn[x]
-		(enqueue ch
-			 {:status 200, :headers {"content-type" "text/plain"}, :body x}))))))
+  (longpoll ch ulazniq)
+  )
 
 (def ruter (app
             (wrap-file-info)
@@ -36,6 +60,8 @@
             ["queuein"] (wrap-params fillq)
             ["poll"]
             (wrap-params (wrap-aleph-handler long-poll-handler))
+	    ["tictactoe"] (wrap-params tictactoehandler_in)
+	    ["fieldsout"] (wrap-aleph-handler tictactoehandler_out)
             ))
 
 (def stop (start-http-server (wrap-ring-handler ruter) {:port 8080}))

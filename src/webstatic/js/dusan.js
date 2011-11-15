@@ -1,8 +1,4 @@
 $(document).ready(function(){
-	$('#txtValue').keyup(function(){
-                sendValue($(this).val());  
-               
-            });
 	$('#brdimg').click(function(e){
 		sendCoords(e,$(this));
 	    });
@@ -10,22 +6,18 @@ $(document).ready(function(){
 	    xsize:$('#brdimg').width(),
 	    ysize:$('#brdimg').height()
 	};
+    waitForMsg();
            
     });
-function sendValue(str){
-    $.post("ajax/test/"+str, {name:"Dusan", surname:"Miloradovic"},
-	   function(data){
-	       $('#display').html(data);
-	   },"html");
-           
-}
 
 	
 function sendCoords(e,t){
     var x=e.pageX - t.offset().left;
     var y=e.pageY - t.offset().top;
-    $.post("tictactoe",{xcoord:x/$.board.xsize, ycoord:y/$.board.ysize},
-	   function (data){
+    $.post("tictactoe",{xcoord:x/$.board.xsize, ycoord:y/$.board.ysize});
+}
+
+function displayField(data){
 	       var xField=jQuery.parseJSON(data).xfield;
        	       var yField=jQuery.parseJSON(data).yfield;
 	       var xDraw=(xField+0.5)* ($.board.xsize/3);
@@ -39,5 +31,29 @@ function sendCoords(e,t){
        	       var dOffsety=obja.height()/2;
 	       obja.css({'left':'-='+dOffsetx,'top':'-='+dOffsety});
 
-	   });
-}
+	   }
+
+    function waitForMsg(){
+      
+        $.ajax({
+            type: "GET",
+            url: "fieldsout",
+
+            async: true, /* If set to non-async, browser shows page as "Loading.."*/
+            cache: false,
+            timeout:50000, /* Timeout in ms */
+
+            success: function(data){ /* called when request to barge.php completes */
+                displayField(data); /* Add response to a .msg div (with the "new" class)*/
+                setTimeout(
+                    'waitForMsg()', /* Request next message */
+                    500 /* ..after 1 seconds */
+                );
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+                setTimeout(
+                    'waitForMsg()', /* Try again after.. */
+                    "1000"); /* milliseconds (15seconds) */
+            }
+        });
+    };

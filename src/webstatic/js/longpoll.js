@@ -30,7 +30,7 @@ function addmsg(type, msg){
                 setTimeout(
                     'waitForMsg()', /* Try again after.. */
                     "15000"); /* milliseconds (15seconds) */
-            },
+            }
         });
     };
 
