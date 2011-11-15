@@ -48,15 +48,10 @@ function displayField(data){
 
             success: function(data){ /* called when request to barge.php completes */
                 displayField(data); /* Add response to a .msg div (with the "new" class)*/
-                setTimeout(
-                    'waitForMsg()', /* Request next message */
-                    500 /* ..after 1 seconds */
-                );
+		waitForMsg();
             },
             error: function(XMLHttpRequest, textStatus, errorThrown){
-                setTimeout(
-                    'waitForMsg()', /* Try again after.. */
-                    "1000"); /* milliseconds (15seconds) */
+	    	waitForMsg();
             }
         });
     };
