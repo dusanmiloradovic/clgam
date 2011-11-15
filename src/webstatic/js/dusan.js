@@ -2,13 +2,16 @@ $(document).ready(function(){
 	$('#brdimg').click(function(e){
 		sendCoords(e,$(this));
 	    });
-	$.board = {
-	    xsize:$('#brdimg').width(),
-	    ysize:$('#brdimg').height()
-	};
     waitForMsg();
            
     });
+
+$(window).load(function (e){
+    	$.board = {
+	    xsize:$('#brdimg').width(),
+	    ysize:$('#brdimg').height()
+	};
+});
 
 	
 function sendCoords(e,t){
