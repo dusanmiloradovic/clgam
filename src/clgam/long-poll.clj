@@ -11,6 +11,28 @@
   (:require [clojure.contrib.json :as j])
   )
 
+(def igraci #{"kristina","ruzica","dusan","pera","mika","laza"})
+(comment Kasnije ce da se naravno napravi pravi login modul)
+
+(defn login [username site session]
+  "za sada cu da zanemarim sajt, ali kasnije ce da se svako loguje na svoj"
+  (if (contains? username igraci)
+    (assoc session username)
+    ))
+
+(defn login_handler [{params :params , session :session}]
+  (if-let [session (login (params "username") :firstsite session)]
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :session session
+     :body (params "useranme")
+     }
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body "Login failed"
+     }))
+    
+    
 (def ulazniq (channel))
 
 (def coords_inq (channel))
