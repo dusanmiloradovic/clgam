@@ -20,6 +20,11 @@
     (assoc session username)
     ))
 
+(defmacro with-session [request body]
+  `(let [sesion (:session request)]
+     (if (and session (:username session))
+       ~body)))
+
 (defn login_handler [{params :params , session :session}]
   (if-let [session (login (params "username") :firstsite session)]
     {:status 200
