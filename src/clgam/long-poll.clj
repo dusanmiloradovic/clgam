@@ -21,9 +21,23 @@
     ))
 
 (defmacro with-session [request body]
-  `(let [sesion# (:session ~request)]
+  `(let [session# (:session ~request)]
      (if (and session# (:username session#))
        ~body)))
+
+(defn start_new_game [request game_name]
+  "za sada imam samo iksoks tako da
+ovo treba da zove samo to"
+  )
+
+
+
+(defn join_game [request game_name game])
+
+(defn play [request game]
+  "procitace koordinate iz requesta"
+  )
+
 
 (defn login_handler [{params :params , session :session}]
   (if-let [session (login (params "username") :firstsite session)]

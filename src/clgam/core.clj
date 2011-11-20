@@ -5,64 +5,50 @@
 (def left [-1 0])
 (defstruct koord :xcoord, :ycoord)
 (defn move-up [koords]
-	    (struct-map koord :xcoord (:xcoord koords)
-			:ycoord (+ 1 (:ycoord koords))))
+  (struct-map koord :xcoord (:xcoord koords)
+	      :ycoord (+ 1 (:ycoord koords))))
 (defn move-right [koords]
-	(struct-map koord :xcoord (+ 1 (:xcoord koords))
-		    :ycoord (:ycoord koords)))
+  (struct-map koord :xcoord (+ 1 (:xcoord koords))
+	      :ycoord (:ycoord koords)))
 (def move-up-right-diag (comp move-up move-right))
 
 (defn move-up [koords]
-	    (struct-map koord :xcoord (:xcoord koords)
-			:ycoord (+ 1 (:ycoord koords))))
+  (struct-map koord :xcoord (:xcoord koords)
+	      :ycoord (+ 1 (:ycoord koords))))
 (defn move
   [board-check  direction koords]
-(let [new_koords     (struct-map koord :xcoord (+ (direction 0) (:xcoord koords))
-				 :ycoord (+ (direction 1) (:ycoord koords)))]
-  (if (board-check new_koords)
-    new_koords
-nil
-    )))
-
-
-
-
-(defn tictactoeboard[koord]
-  (and   (<= 0 (:xcoord koord)) (> 3 (:xcoord koord))
-	 (<= 0 (:ycoord koord)) (> 3 (:ycoord koord))
-	 ))
-
-
-(defrecord player [igra figure potez])
-
-(def igrac1 (player. nil nil nil))
-(def igrac2 (player. nil nil nil))
-
-(defn kvadratna_tabla[n]
-  (let [row (vec (replicate n nil))
-	board (vec (replicate n row))]
-    board)
-  )
-
-(defn place[tabla figura koordinate]
-  (assoc tabla (:ycoord koordinate) (assoc (tabla (:ycoord koordinate)) (:xcoord koordinate)
-					   figura)))
-
-(defn place2[tabla figura koordinate]
-  (letfn  [(cheka
-	       [x y board_check]
-  (let [mapped (struct-map koord :xcoord x :ycoord y)]
-    (if (board_check mapped)
-      mapped
-      nil)))]
-	   (if (cheka(:xcoord koordinate) (:ycoord koordinate) tictactoeboard)
-  (assoc tabla (:ycoord koordinate) (assoc (tabla (:ycoord koordinate)) (:xcoord koordinate)
-					   figura))
-        nil
+  (let [new_koords     (struct-map koord :xcoord (+ (direction 0) (:xcoord koords))
+				   :ycoord (+ (direction 1) (:ycoord koords)))]
+    (if (board-check new_koords)
+      new_koords
+      nil
       )))
 
+(defn kvadratna_tabla[n & pocetni_podaci]
+  [(if pocetni_podaci
+     pocetni_podaci
+     (let [row (vec (replicate n nil))
+	   board (vec (replicate n row))]
+     board))
+   (fn[koords]
+     (and   (<= 0 (:xcoord koord)) (> n (:xcoord koord))
+	    (<= 0 (:ycoord koord)) (> n (:ycoord koord))
+	    )
+     )
+   ]
+  )
 
+(def tictactoeboard (kvadratna_tabla 3))
 
+(defn place [tabla figura koordinate]
+  "tabla je closure sa figurama  i funkcijom validacije polja"
+  (let [tabla_podaci (tabla 0)]
+    (when ((tabla 1) koordinate)
+      (cons
+       (assoc tabla_podaci (:ycoord koordinate) (assoc (tabla_podaci (:ycoord koordinate)) (:xcoord koordinate) figura)) (next tabla)
+       ))))
+
+    
 (defn next_player [current_player players]
   (let [nextone
 	(loop [current_player current_player players players]
@@ -93,8 +79,8 @@ nil
   )
 
 (defn opposite [direction]
-	[ (* -1 (direction 0)) (* -1 (direction 1))]
-	)
+  [ (* -1 (direction 0)) (* -1 (direction 1))]
+  )
 
 (defn connected_both [tabla figura koordinate board_check direction]
   (let [fja (partial connected_direction tabla figura koordinate board_check)]
@@ -108,14 +94,14 @@ nil
 
 (defn diag_up_connected[tabla figura koordinate board_check]
   (connected_both tabla figura koordinate board_check (vec (map + up right))))
-  
+
 (defn diag_down_connected[tabla figura koordinate board_check]
-    (connected_both tabla figura koordinate board_check (vec (map + up left))))
+  (connected_both tabla figura koordinate board_check (vec (map + up left))))
 
 
 (defn hor_connected[tabla figura koordinate board_check]
-      (connected_both tabla figura koordinate board_check right))
-  
+  (connected_both tabla figura koordinate board_check right))
+
 (defn ver_connected[tabla figura koordinate board_check]
   (connected_both tabla figura koordinate board_check up))
 
@@ -145,8 +131,10 @@ nil
 (defn startuj-partiju[igraci tabla event_fx]
   (ref  (Partija.  igraci tabla nil nil event_fx)))
 
+
+
 (defn tictactoeevents[partija]
-  (let [tabla (:tabla @partija)]
+  (let [tabla (:tabla @partija), tictactoeboard (fnext tabla)]
     [
      {
       :event
@@ -168,7 +156,7 @@ nil
      {
       :event
       (fn c[igrac figura koordinate]
-		(println "uso")
+	(println "uso")
 	((comp not nil?)
 	 (figure tabla koordinate)
 	 )
@@ -218,7 +206,7 @@ nil
 	     (or  (:invalid_move @partija) (:game_over @partija)))
 
 	  nil
-	  (let [nova_tabla (place2 tabla figura koordinate) pre_promene @partija]
+	  (let [nova_tabla (place tabla figura koordinate) pre_promene @partija]
 	    (if nova_tabla
 	      (dosync
 	       (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))})
@@ -253,22 +241,21 @@ nil
   (let [displayed (if include? columns (remove (set columns) fields))
 	labls (map #(str ":" %) displayed)
 	]
-   `(defrecord ~name ~fields
-      Object
-      (toString [_#]
-		(clojure.string/join " "
-				     (interleave
-				     [~@labls]
-				     [~@displayed]))))))
+    `(defrecord ~name ~fields
+       Object
+       (toString [_#]
+		 (clojure.string/join " "
+				      (interleave
+				       [~@labls]
+				       [~@displayed]))))))
 
 (def boards
-  {:tictactoe [3 3],
-   :go [19 19]})
- 
+     {:tictactoe [3 3],
+      :go [19 19]})
+
 (defn transfer-board-koords[x y game]
   (let [[xb yb] (boards (keyword game))]
-        {:xfield (int (* x xb)) , :yfield (int (* y yb))}
-       ))
-  
-  
-  
+    {:xfield (int (* x xb)) , :yfield (int (* y yb))}
+    ))
+
+
