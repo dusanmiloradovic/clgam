@@ -41,16 +41,28 @@
 (def tictactoeboard (kvadratna_tabla 3))
 
 (def tictactoe_static
-     [{"W", "white.gif"}, {"B" "black.gif"}])
+     [["W" "B"], ["white.gif" "black.gif"]])
+
+(defn random_igrac[]
+  ((vec (tictactoe_static 0)) (rand-int 2)))
 
 (def soba (ref {}))
+
+(def igraci (ref {}))
 
 
 (defn postavi_igru[igra username]
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
-  (let [game_id (gensym)]
+  (let [game_id (gensym) , figura (random_igrac)]
+    
+    (dosync
+     (alter soba assoc game_id username)
+     (alter igraci assoc username [figura game_id])
+     )))
 
-   ))
+(defn join_game[game_uid username]
+  "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid")
+  
 
 (defn place [tabla figura koordinate]
   "tabla je closure sa figurama  i funkcijom validacije polja"
