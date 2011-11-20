@@ -40,10 +40,22 @@
 
 (def tictactoeboard (kvadratna_tabla 3))
 
+(def tictactoe_static
+     [{"W", "white.gif"}, {"B" "black.gif"}])
+
+(def soba (ref {}))
+
+
+(defn postavi_igru[igra username]
+  "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
+  (let [game_id (gensym)]
+
+   ))
+
 (defn place [tabla figura koordinate]
   "tabla je closure sa figurama  i funkcijom validacije polja"
-  (let [tabla_podaci (tabla 0)]
-    (when ((tabla 1) koordinate)
+  (let [tabla_podaci (first tabla)]
+    (when ((fnext tabla) koordinate)
       (cons
        (assoc tabla_podaci (:ycoord koordinate) (assoc (tabla_podaci (:ycoord koordinate)) (:xcoord koordinate) figura)) (next tabla)
        ))))
