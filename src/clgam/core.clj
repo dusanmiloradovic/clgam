@@ -43,8 +43,12 @@
 (def tictactoe_static
      [["W" "B"], ["white.gif" "black.gif"]])
 
-(defn random_igrac[]
-  ((vec (tictactoe_static 0)) (rand-int 2)))
+(defn random_igrac
+  ([] ((vec (tictactoe_static 0)) (rand-int 2)))
+  ([postojeca]
+     (let [ostatak (remove (set postojeca) (tictactoe_static 0))]
+     (ostatak (rand-ind (count ostatak)))))
+  
 
 (def soba (ref {}))
 
@@ -56,14 +60,18 @@
   (let [game_id (gensym) , figura (random_igrac)]
     
     (dosync
-     (alter soba assoc game_id username)
+     (alter soba assoc game_id list(username))
      (alter igraci assoc username [figura game_id])
      )))
 
 (defn join_game[game_uid username]
-  "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid")
-  
-
+  "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
+  (let [svi_igraci (cons username (@soba game_uid))
+	zauzete_figure (map #((% 1)0) (select-keys @igraci (@soba game_uid)))
+	]
+    
+    
+    
 (defn place [tabla figura koordinate]
   "tabla je closure sa figurama  i funkcijom validacije polja"
   (let [tabla_podaci (first tabla)]
