@@ -68,7 +68,13 @@
   "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
   (let [svi_igraci (cons username (@soba game_uid))
 	zauzete_figure (map #((% 1)0) (select-keys @igraci (@soba game_uid)))
+	figura (random_igrac zauzete_figure)
 	]
+    (when figura
+      (dosync
+       (alter soba assoc game_uid list(username))
+       (alter igraci assoc username [figura game_uid])
+       ))))
     
     
     
