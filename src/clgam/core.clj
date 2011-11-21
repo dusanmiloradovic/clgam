@@ -61,7 +61,7 @@
   (let [game_id (gensym) , figura (random_igrac)]
     
     (dosync
-     (alter soba assoc game_id list(username))
+     (alter soba assoc game_id (list username))
      (alter igraci assoc username [figura game_id])
      )))
 
