@@ -47,13 +47,14 @@
   ([] ((vec (tictactoe_static 0)) (rand-int 2)))
   ([postojeca]
      (let [ostatak (remove (set postojeca) (tictactoe_static 0))]
-     (ostatak (rand-ind (count ostatak)))))
+     (ostatak (rand-int (count ostatak))))))
   
 
 (def soba (ref {}))
 
 (def igraci (ref {}))
 
+(def igre (ref {}))
 
 (defn postavi_igru[igra username]
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
@@ -64,17 +65,7 @@
      (alter igraci assoc username [figura game_id])
      )))
 
-(defn join_game[game_uid username]
-  "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
-  (let [svi_igraci (cons username (@soba game_uid))
-	zauzete_figure (map #((% 1)0) (select-keys @igraci (@soba game_uid)))
-	figura (random_igrac zauzete_figure)
-	]
-    (when figura
-      (dosync
-       (alter soba assoc game_uid list(username))
-       (alter igraci assoc username [figura game_uid])
-       ))))
+
     
     
     
@@ -213,7 +204,19 @@
   )
 
 
-
+(defn join_game[game_uid username]
+  "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
+  (let [svi_igraci (cons username (@soba game_uid))
+	zauzete_figure (map #((% 1)0) (select-keys @igraci (@soba game_uid)))
+	figura (random_igrac zauzete_figure)
+	]
+    (when figura
+      (dosync
+       (alter soba assoc game_uid list(username))
+       (alter igraci assoc username [figura game_uid])
+       (when (= (count svi_igraci) 2)
+         (alter igre assoc (startuj-partiju svi_igraci tictactoeboard tictactoeevents)))
+       ))))
 
 (defn check_rules[partija igrac koordinate figura]
   (some true?
