@@ -46,7 +46,7 @@
 (defn random_igrac
   ([] ((vec (tictactoe_static 0)) (rand-int 2)))
   ([postojeca]
-     (let [ostatak (remove (set postojeca) (tictactoe_static 0))]
+     (let [ostatak (vec (remove (set postojeca) (tictactoe_static 0)))]
      (ostatak (rand-int (count ostatak))))))
   
 
