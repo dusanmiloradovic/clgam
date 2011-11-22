@@ -164,12 +164,12 @@
 
 
 (defn tictactoeevents[partija]
-  (let [tabla (:tabla @partija), tictactoeboard (fnext tabla)]
+  (let [tabla (first (:tabla @partija)) , tictactoeboard (fnext (:tabla @partija))]
     [
      {
       :event
       (fn mosha[igrac figura koordinate]
-	(println "uso")
+        (println (str "mosha" tabla))
 	(or (= 3 (diag_up_connected tabla figura koordinate tictactoeboard))
 	    (= 3 (diag_down_connected tabla figura koordinate tictactoeboard))
 	    (= 3 (hor_connected tabla figura koordinate tictactoeboard))
@@ -186,7 +186,7 @@
      {
       :event
       (fn c[igrac figura koordinate]
-	(println "uso")
+	(println (str "c" igrac figura koordinate))
 	((comp not nil?)
 	 (figure tabla koordinate)
 	 )
@@ -223,8 +223,10 @@
 (defn check_rules[partija igrac koordinate figura]
   (some true?
 	(let [ev_functions (:event_fx @partija) events (ev_functions partija)]
+          (println (str "events " events))
 	  (for [xxx events]
 	    (let [happened ((:event xxx) igrac figura koordinate)]
+              (println (str "xxx " xxx))
 	      (when happened
 		(do
 		  ((:handler xxx))
@@ -258,8 +260,8 @@
 	    ))))))
 
 (defn play_game [guid igrac [korx kory] & figura]
-  (let [partija (igre @guid)
-	figura_p ((if figura figura ((@igraci igrac)0)))]
+  (let [partija (@igre guid)
+	figura_p (if figura figura ((@igraci igrac)0))]
     (play partija (kor korx kory) igrac figura_p))
   )
 
