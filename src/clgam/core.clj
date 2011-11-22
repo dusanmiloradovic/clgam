@@ -56,8 +56,9 @@
 
 (def igre (ref {}))
 
-(defn postavi_igru[igra username]
+(defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
+  [igra username]
   (let [game_id (gensym) , figura (random_igrac)]
     
     (dosync
@@ -204,8 +205,9 @@
   )
 
 
-(defn join_game[game_uid username]
+(defn join_game
   "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
+  [game_uid username]
   (let [svi_igraci (cons username (@soba game_uid))
 	zauzete_figure (map #((% 1)0) (select-keys @igraci (@soba game_uid)))
 	figura (random_igrac zauzete_figure)
@@ -234,7 +236,8 @@
   (struct-map koord :xcoord x :ycoord y))
 
 
-(defn play[partija koordinate igrac figura & review]
+(defn play
+  [partija koordinate igrac figura & review]
   (when-not (and  (nil? review) (:game_over @partija))
     (dosync
      (alter partija merge {:invalid_move false}))
@@ -254,11 +257,13 @@
 	       nil))
 	    ))))))
 
-
-(defn play[guid igrac koordinate & figura]
+(defn play_game [guid igrac [korx kory] & figura]
   (let [partija (igre @guid)
 	figura_p ((if figura figura ((@igraci igrac)0)))]
-    (play partija koordinate igrac figura_p)))
+    (play partija (kor korx kory) igrac figura_p))
+  )
+
+
 
 (defn revert[partija]
   (dosync
