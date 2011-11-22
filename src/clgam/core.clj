@@ -212,10 +212,10 @@
 	]
     (when figura
       (dosync
-       (alter soba assoc game_uid list(username))
+       (alter soba assoc game_uid (cons username (@soba game_uid)))
        (alter igraci assoc username [figura game_uid])
        (when (= (count svi_igraci) 2)
-         (alter igre assoc (startuj-partiju svi_igraci tictactoeboard tictactoeevents)))
+         (alter igre assoc game_uid (startuj-partiju svi_igraci tictactoeboard tictactoeevents)))
        ))))
 
 (defn check_rules[partija igrac koordinate figura]
@@ -253,6 +253,12 @@
 	       (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))})
 	       nil))
 	    ))))))
+
+
+(defn play[guid igrac koordinate & figura]
+  (let [partija (igre @guid)
+	figura_p ((if figura figura ((@igraci igrac)0)))]
+    (play partija koordinate igrac figura_p)))
 
 (defn revert[partija]
   (dosync
