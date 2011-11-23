@@ -169,7 +169,6 @@
      {
       :event
       (fn mosha[igrac figura koordinate]
-        (println (str "mosha" tabla))
 	(or (= 3 (diag_up_connected tabla figura koordinate tictactoeboard))
 	    (= 3 (diag_down_connected tabla figura koordinate tictactoeboard))
 	    (= 3 (hor_connected tabla figura koordinate tictactoeboard))
@@ -179,9 +178,9 @@
 
       :handler
       (fn b[]
-	(dosync
-	 (println (str "Igrac" (:sledeci_igrac @partija) " je pobedio") )
-	 (alter partija merge {:game_over true })))
+        (println (str "Igrac"  " je pobedio") )
+        {:game_over true , :winner (:sledeci_igrac @partija) }
+        )
       }
      {
       :event
@@ -194,11 +193,9 @@
 
       :handler
       (fn d[]
-	(dosync
-	 (alter partija merge {:invalid_move true})
-	 (println "Invalid move")
-	 )
-	)
+        (println "Invalid move")
+        {:invalid_move true}
+        )
       }
      ]
     )
@@ -220,6 +217,12 @@
          (alter igre assoc game_uid (startuj-partiju svi_igraci tictactoeboard tictactoeevents)))
        ))))
 
+(defn check_rules[partija igrac koordinate figura]
+  (let [ev_functions (:event_fx @partija) events (ev_functions partija)]
+    (remove nil?
+            (for [xxx p]
+              (when ((:event xxx) igrac figura koordinate)
+                (:handler xxx))))))
 (defn check_rules[partija igrac koordinate figura]
   (some true?
 	(let [ev_functions (:event_fx @partija) events (ev_functions partija)]
