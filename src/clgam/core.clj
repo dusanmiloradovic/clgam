@@ -88,7 +88,7 @@
        (alter soba assoc game_uid (cons username (@soba game_uid)))
        (alter igraci assoc username [figura game_uid])
        (when (= (count svi_igraci) 2)
-         (alter igre assoc game_uid (startuj-partiju svi_igraci tictactoeboard tictactoeevents)))
+         (alter igre assoc game_uid (startuj-partiju svi_igraci tictactoeboard tictactoeevents game_uid)))
        ))))
 
 (defn check_rules[partija igrac koordinate figura]
