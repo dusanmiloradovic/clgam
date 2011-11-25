@@ -1,4 +1,5 @@
-(ns clgam.core)
+(ns clgam.core
+  (:use lamina.core))
 (def up [0 1])
 (def down [0 -1])
 (def right [1 0])
@@ -56,6 +57,8 @@
 
 (def igre (ref {}))
 
+(def kanali (ref {}))
+
 (defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
   [igra username]
@@ -64,6 +67,12 @@
     (dosync
      (alter soba assoc game_id (list username))
      (alter igraci assoc username [figura game_id])
+     (let [c (channel)]
+       (alter kanali assoc game_id c)
+       (receive-all c (fn [x]
+                        (when-let [igra (@igre game_id)]
+                          (dosync
+                           (alter igra #(merge % x)))))))
      )))
 
 
@@ -175,12 +184,9 @@
 	    (= 3 (ver_connected tabla figura koordinate tictactoeboard))
 	    )
 	)
-
+      ,
       :handler
-      (fn b[]
-        (println (str "Igrac"  " je pobedio") )
-        {:game_over true , :winner (:sledeci_igrac @partija) }
-        )
+      {:game_over true , :winner (:sledeci_igrac @partija) }
       }
      {
       :event
@@ -190,12 +196,9 @@
 	 (figure tabla koordinate)
 	 )
 	)
-
       :handler
-      (fn d[]
-        (println "Invalid move")
-        {:invalid_move true}
-        )
+      {:invalid_move true}
+      
       }
      ]
     )
@@ -218,12 +221,18 @@
        ))))
 
 (defn check_rules[partija igrac koordinate figura]
-  (let [ev_functions (:event_fx @partija) events (ev_functions partija)]
-    (remove nil?
-            (for [xxx p]
-              (when ((:event xxx) igrac figura koordinate)
-                (:handler xxx))))))
-(defn check_rules[partija igrac koordinate figura]
+  (let [ev_functions (:event_fx @partija)
+        events (ev_functions partija)
+        game_uid (:game_uid @partija)
+        game_channel (game_uid @kanali)
+        ]
+    (map #(enqueue game_channel %)
+         (remove nil?
+                 (for [xxx events]
+                   (when ((:event xxx) igrac figura koordinate)
+                     (:handler xxx)))))))
+
+(defn check_rules_old[partija igrac koordinate figura]
   (some true?
 	(let [ev_functions (:event_fx @partija) events (ev_functions partija)]
           (println (str "events " events))
@@ -246,7 +255,7 @@
   (when-not (and  (nil? review) (:game_over @partija))
     (dosync
      (alter partija merge {:invalid_move false}))
-    (let [tabla (:tabla @partija) event_functions (:event_fx @partija)]
+    (let [tabla (:tabla @partija) ]
       (if (and (not (nil? (:sledeci_igrac @partija))) (not= (:sledeci_igrac @partija) igrac))
 	(println "Pogresan igrac")
 	(if
