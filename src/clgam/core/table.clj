@@ -30,7 +30,7 @@
      (let [row (vec (replicate n nil))
 	   board (vec (replicate n row))]
      board))
-   (fn[koords]
+   (fn[koord]
      (and   (<= 0 (:xcoord koord)) (> n (:xcoord koord))
 	    (<= 0 (:ycoord koord)) (> n (:ycoord koord))
 	    )
@@ -91,15 +91,15 @@
   )
 
 (defn tictactoeevents[partija]
-  (let [tabla (first (:tabla @partija)) , tictactoeboard (fnext (:tabla @partija))]
+  (let [tabla (first (:tabla @partija)) , ttboard-f (fnext (:tabla @partija))]
     [
      {
       :event
       (fn mosha[igrac figura koordinate]
-	(or (= 3 (diag_up_connected tabla figura koordinate tictactoeboard))
-	    (= 3 (diag_down_connected tabla figura koordinate tictactoeboard))
-	    (= 3 (hor_connected tabla figura koordinate tictactoeboard))
-	    (= 3 (ver_connected tabla figura koordinate tictactoeboard))
+	(or (= 3 (diag_up_connected tabla figura koordinate ttboard-f))
+	    (= 3 (diag_down_connected tabla figura koordinate ttboard-f))
+	    (= 3 (hor_connected tabla figura koordinate ttboard-f))
+	    (= 3 (ver_connected tabla figura koordinate ttboard-f))
 	    )
 	)
       ,
@@ -109,7 +109,6 @@
      {
       :event
       (fn c[igrac figura koordinate]
-	(println (str "c" igrac figura koordinate))
 	((comp not nil?)
 	 (figure tabla koordinate)
 	 )

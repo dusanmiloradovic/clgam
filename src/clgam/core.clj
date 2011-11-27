@@ -104,6 +104,17 @@
                     (when ((:event xxx) igrac figura koordinate)
                       (:handler xxx))))))))
 
+(let [ev_functions (:event_fx @partija)
+        events (ev_functions partija)
+        game_uid (:game_uid @partija)
+        game_channel (game_uid @kanali)
+        ]
+          (remove nil?
+                  (for [xxx events]
+		    (:event xxx))))
+
+
+
 
 (defn kor [x y]
   (struct-map koord :xcoord x :ycoord y))
@@ -118,15 +129,19 @@
       (if (and (not (nil? (:sledeci_igrac @partija))) (not= (:sledeci_igrac @partija) igrac))
 	(println "Pogresan igrac")
         (let [game_uid (:game_uid @partija) , game_channel (@kanali game_uid)
-              kopija (receive-all (fork game_channel) (fn[_]))]
-          (when (and
-                 (check_rules partija igrac koordinate figura)
-                 kopija
-                 (not (or  (:invalid_move @partija) (:game_over @partija))))
-            (let [nova_tabla (place tabla figura koordinate) pre_promene @partija]
-              (when nova_tabla
-                (dosync
-                 (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))}))))))))))
+              kopija (receive-all (fork game_channel) (fn[_])),
+	      rule_event_happened (check_rules partija igrac koordinate figura)
+	      ]
+          (when
+	      (or (not rule_event_happened)
+		  (and
+		   rule_event_happened
+		   kopija
+		   (not (or  (:invalid_move @partija) (:game_over @partija)))))
+	    (let [nova_tabla (place tabla figura koordinate) pre_promene @partija]
+	      (when nova_tabla
+		(dosync
+		 (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))}))))))))))
 
 
 (defn play_game [guid igrac [korx kory] & figura]
