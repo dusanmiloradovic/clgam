@@ -12,6 +12,12 @@
   )
 
 (def igraci #{"kristina","ruzica","dusan","pera","mika","laza"})
+(defn empty-response
+  "Koristim za AJAX pozive gde nije bitan response, nego se response dobija
+pomocu long-pollinga ili websocketa"
+  [] {:status 200
+      :headers {"content-type" "text/plain"}
+      :body ""})
 (comment Kasnije ce da se naravno napravi pravi login modul)
 
 (defn login [username site session]
@@ -24,11 +30,15 @@
   `(let [session# (:session ~request)]
      (if (and session# (:username session#))
        ~body)))
-
 (defn start_new_game [request game_name]
   "za sada imam samo iksoks tako da
 ovo treba da zove samo to"
-  )
+  (with-session request
+    (
+     (c/postavi_igru game_name (:username (:session request)))
+     (empty-response)
+     )
+  ))
 
 
 
@@ -60,9 +70,7 @@ ovo treba da zove samo to"
 (defn tictactoehandler_in [{params :params}]
   (let [[x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])]
     (enqueue coords_inq (j/json-str (c/transfer-board-koords x y "tictactoe")))
-    {:status 200
-     :headers {"Content-Type" "text/html"}
-     :body ""}
+    (empty-response)
     ))
 
 
@@ -81,9 +89,7 @@ ovo treba da zove samo to"
   (let [val (params "val")]
      (enqueue ulazniq val)
     )
-    {:status 200
-   :headers {"content-type" "text/plain"}
-   :body ""}
+    (empty-response)
   )
 
 (receive-all ulazniq (fn[x] (println "praznim" x)))
