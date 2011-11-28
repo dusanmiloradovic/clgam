@@ -8,13 +8,22 @@
      (ostatak (rand-int (count ostatak))))))
   
 
-(def soba (ref {}))
+(def soba (ref {:chat-channel (channel), :game-list-channel (channel)}))
 
 (def igraci (ref {}))
 
 (def igre (ref {}))
 
 (def kanali (ref {}))
+
+(defn get-game-invitations[ime_sobe ime_igre]
+  "oba parametra za sada ignorisem jerbo imam samo jednu sobu i jednu igru"
+  "jer ce kljucevi za mapu biti keywoedi za kanale, a simboli i stringovi za igre"
+  (select-keys @soba (filter #(contains? @igre %)
+			     (filter (comp not keyword?) (keys @soba)))))
+
+    
+    
 
 (defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"

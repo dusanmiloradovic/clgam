@@ -49,7 +49,7 @@ ovo treba da zove samo to"
   )
 
 
-(defn login_handler [{params :params , session :session}]
+(defn login-handler [{params :params , session :session}]
   (if-let [session (login (params "username") :firstsite session)]
     {:status 200
      :headers {"Content-Type" "text/html"}
@@ -109,6 +109,7 @@ ovo treba da zove samo to"
             (wrap-params (wrap-aleph-handler long-poll-handler))
 	    ["tictactoe"] (wrap-params tictactoehandler_in)
 	    ["fieldsout"] (wrap-aleph-handler tictactoehandler_out)
+	    ["login"] (wrap-params login-handler)
             ))
 
 (def stop (start-http-server (wrap-ring-handler ruter) {:port 8080}))
