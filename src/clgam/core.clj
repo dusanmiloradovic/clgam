@@ -6,7 +6,6 @@
   ([postojeca]
      (let [ostatak (vec (remove (set postojeca) (tictactoe_static 0)))]
      (ostatak (rand-int (count ostatak))))))
-  
 
 (def soba (ref {:chat-channel (channel), :game-list-channel (channel)}))
 
@@ -19,11 +18,9 @@
 (defn get-game-invitations[ime_sobe ime_igre]
   "oba parametra za sada ignorisem jerbo imam samo jednu sobu i jednu igru"
   "jer ce kljucevi za mapu biti keywoedi za kanale, a simboli i stringovi za igre"
-  (select-keys @soba (filter #(contains? @igre %)
+  (select-keys @soba (filter #(contains? (keys @igre) %)
 			     (filter (comp not keyword?) (keys @soba)))))
 
-    
-    
 
 (defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
@@ -33,6 +30,7 @@
     (dosync
      (alter soba assoc game_id (list username))
      (alter igraci assoc username [figura game_id])
+     (enqueue (:game-list-channel @soba) [game_id username])
      (let [c (channel)]
        (alter kanali assoc game_id c)
        (receive-all c (fn [x]
@@ -41,10 +39,6 @@
                            (alter igra #(merge % x)))))))
      )))
 
-
-    
-    
-    
 (defn place [tabla figura koordinate]
   "tabla je closure sa figurama  i funkcijom validacije polja"
   (let [tabla_podaci (first tabla)]
@@ -112,19 +106,6 @@
                   (for [xxx events]
                     (when ((:event xxx) igrac figura koordinate)
                       (:handler xxx))))))))
-
-(let [ev_functions (:event_fx @partija)
-        events (ev_functions partija)
-        game_uid (:game_uid @partija)
-        game_channel (game_uid @kanali)
-        ]
-          (remove nil?
-                  (for [xxx events]
-		    (:event xxx))))
-
-
-
-
 (defn kor [x y]
   (struct-map koord :xcoord x :ycoord y))
 
