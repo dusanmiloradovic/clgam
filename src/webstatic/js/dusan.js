@@ -2,6 +2,7 @@ $(document).ready(function(){
 	$('#brdimg').click(function(e){
 		sendCoords(e,$(this));
 	    });
+
     waitForMsg();
            
     });

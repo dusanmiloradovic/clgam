@@ -16,6 +16,12 @@
       top:30px;
       z-index:1;
       }
+      #startgame
+      {
+      position:absolute;
+      top:0px;
+      right:20px;
+      }
     </style>
     <title>Ajax With Jquery and Clojure</title>
     
@@ -30,6 +36,12 @@
     <div id="igra" >
       <img id="brdimg" src="img/tabla.jpg" />
     </div>
-  </div>
+    
+    <div id="startgame">
+      <form id="sgame" action="/startgame" type="POST">
+	          <button type="submit">Start Game</button>   
+	<form>
+      </div>
+    
 </body>
 </html>
