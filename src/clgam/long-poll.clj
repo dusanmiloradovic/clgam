@@ -6,6 +6,7 @@
   (:use ring.middleware.file-info)
   (:use ring.middleware.content-type)
   (:use ring.middleware.params)
+  (:use ring.middleware.session)
   (:use  [clojure.contrib.str-utils :only [str-join]])
   (:require  [clgam.core :as c])
   (:require [clojure.contrib.json :as j])
@@ -21,9 +22,10 @@ pomocu long-pollinga ili websocketa"
 (comment Kasnije ce da se naravno napravi pravi login modul)
 
 (defn login [username site session]
+  (println (str "Usao u login" username site session))
   "za sada cu da zanemarim sajt, ali kasnije ce da se svako loguje na svoj"
-  (if (contains? username igraci)
-    (assoc session username)
+  (when (contains?  igraci username)
+    (assoc session :username username)
     ))
 
 (defmacro with-session [request body]
@@ -41,7 +43,7 @@ ovo treba da zove samo to"
   ))
 
 
-
+ 
 (defn join_game [request game_name game])
 
 (defn play [request game]
@@ -50,17 +52,15 @@ ovo treba da zove samo to"
 
 
 (defn login-handler [{params :params , session :session}]
+  (let [sesa (login (params "username") :firstsite session)]
+    (println (str "mosa" sesa session))
+    (empty-response)
+))
+
+(defn login-handler_real [{params :params , session :session}]
   (if-let [session (login (params "username") :firstsite session)]
-    {:status 200
-     :headers {"Content-Type" "text/html"}
-     :session session
-     :body (params "useranme")
-     }
-    {:status 200
-     :headers {"Content-Type" "text/html"}
-     :body "Login failed"
-     }))
-    
+    (-> (redirect "/testajax.html") (assoc :session session))
+    (redirect "/login.html/err=loginfailed")))
     
 (def ulazniq (channel))
 
@@ -104,6 +104,7 @@ ovo treba da zove samo to"
             (wrap-file-info)
             (wrap-file "src/webstatic")
             (wrap-content-type)
+	    (wrap-session)
             ["queuein"] (wrap-params fillq)
             ["poll"]
             (wrap-params (wrap-aleph-handler long-poll-handler))
