@@ -7,6 +7,7 @@
   (:use ring.middleware.content-type)
   (:use ring.middleware.params)
   (:use ring.middleware.session)
+  (:require [ring.util.response :as r])
   (:use  [clojure.contrib.str-utils :only [str-join]])
   (:require  [clgam.core :as c])
   (:require [clojure.contrib.json :as j])
@@ -50,17 +51,11 @@ ovo treba da zove samo to"
   "procitace koordinate iz requesta"
   )
 
-
 (defn login-handler [{params :params , session :session}]
-  (let [sesa (login (params "username") :firstsite session)]
-    (println (str "mosa" sesa session))
-    (empty-response)
-))
-
-(defn login-handler_real [{params :params , session :session}]
-  (if-let [session (login (params "username") :firstsite session)]
-    (-> (redirect "/testajax.html") (assoc :session session))
-    (redirect "/login.html/err=loginfailed")))
+  (if-let [sess(login (params "username") :firstsite session)]
+    (-> (r/redirect
+	 "/testajax.html") (assoc :session sess))
+    (r/redirect "/login.html/err=loginfailed")))
     
 (def ulazniq (channel))
 
