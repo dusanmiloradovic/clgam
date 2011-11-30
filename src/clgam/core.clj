@@ -9,6 +9,12 @@
 
 (def soba (ref {:chat-channel (channel), :game-list-channel (channel)}))
 
+(comment game-list-channel mi samo sluzi da se objavi da je nova igra
+	 objavljena, ili da stara vise nije raspoloziva. Ne mogu da koristim kanal da
+	 distribuiram koje su igre raspolozive jer nemam nacina da mi se registruje kada sklonim igru iz kanala. Pitanje je isto kako da sklonim igru iz kanala. Ovako ce da se u ovaj kanal gura i kada se objavi igra i kada se odjavi igra. Tako da ce ovaj kanal biti sasvim dovoljan da opsluzuje i objavljivanje igara i igre koje su u toku. Stalno se gura u ovaj kanal, i to sluzi samo kao trigger za ajax)
+
+(receive-all (:game-list-channel @soba) (fn[_]))
+
 (def igraci (ref {}))
 
 (def igre (ref {}))
@@ -18,8 +24,11 @@
 (defn get-game-invitations[ime_sobe ime_igre]
   "oba parametra za sada ignorisem jerbo imam samo jednu sobu i jednu igru"
   "jer ce kljucevi za mapu biti keywoedi za kanale, a simboli i stringovi za igre"
-  (select-keys @soba (filter #(contains? (keys @igre) %)
-			     (filter (comp not keyword?) (keys @soba)))))
+  (select-keys @soba
+	       (clojure.set/difference
+		(set (filter (comp not keyword?) (keys @soba)))
+		(set (keys @igre)))))
+  
 
 
 (defn postavi_igru
@@ -90,6 +99,7 @@
       (dosync
        (alter soba assoc game_uid (cons username (@soba game_uid)))
        (alter igraci assoc username [figura game_uid])
+       (enqueue (:game-list-channel @soba) [game_uid username])
        (when (= (count svi_igraci) 2)
          (alter igre assoc game_uid (startuj-partiju svi_igraci tictactoeboard tictactoeevents game_uid)))
        ))))

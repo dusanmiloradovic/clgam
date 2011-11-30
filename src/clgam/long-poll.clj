@@ -1,4 +1,3 @@
-
 (ns clgam.long-poll
   (:use aleph.core lamina.core aleph.http)
   (:use [net.cgrand.moustache :only [app]])
@@ -55,7 +54,7 @@ ovo treba da zove samo to"
   (if-let [sess(login (params "username") :firstsite session)]
     (-> (r/redirect
 	 "/testajax.html") (assoc :session sess))
-    (r/redirect "/login.html/err=loginfailed")))
+    (r/redirect "/login.html?err=loginfailed")))
     
 (def ulazniq (channel))
 
@@ -69,13 +68,33 @@ ovo treba da zove samo to"
     ))
 
 
-(defn longpoll [ch q]
+(defn longpoll 
   "common function for all long poll requests"
+  [ch q]
+  (longpoll-general ch q identity))
+  
+(defn longpoll-general
+  "boilerplate with the channel, queueue and the transformer function"
+  [ch q f]
   (when (not (closed? ch))
-     (receive (fork q)
-	      (fn[x]
-		(enqueue ch
-			 {:status 200, :headers {"content-type" "text/plain"}, :body x})))))
+    (receive (fork q)
+	     (fn[x]
+	       (enqueue ch
+			{:status 200, :headers {"content-type" "text/plain"}, :body (f x)})))))
+
+(defn pending_invitations
+  "read pending game invitations. queue is just a trigger"
+  [ch]
+  (let [game-invitations (c/get-game-invitations :soba :igra)]
+    (longpoll-general ch (:game-list-channel @c/soba)
+		      (fn[x] game-invitations))))
+!!OVO VEROVATNO NECE MOCI.TREBA ZA SVAKI ELEMENT IS GAME-INVITATIONS
+DA SE POZOVE LONGPOLL-GENERAL (JER CU INACE DA URADIM ENQUEUE
+				   SVEGA. MADA KADA MALO BOLJE
+				   RAZMISLIM, KOJA JE RAZLIKA?? TREBA
+				   SAMO DA URADIM JSON KONVERZIJU, I
+				   DA CITAM IZ JAVA SKRIPTA
+  
 
 (defn tictactoehandler_out [ch request]
   (longpoll ch coords_inq))
