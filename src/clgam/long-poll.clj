@@ -28,27 +28,46 @@ pomocu long-pollinga ili websocketa"
     (assoc session :username username)
     ))
 
-(defmacro with-session [request body]
+(defmacro with-session [request & body]
   `(let [session# (:session ~request)]
      (if (and session# (:username session#))
        ~body)))
-(defn start_new_game [request game_name]
-  "za sada imam samo iksoks tako da
-ovo treba da zove samo to"
-  (with-session request
-    (
-     (c/postavi_igru game_name (:username (:session request)))
-     (empty-response)
-     )
-  ))
 
+(defmacro defs [fname [request & rest] & body]
+  `(defn ~fname [~request ~@rest]
+     (with-session ~request ~body)))
+
+(defs start-new-game
+  [request game_name]
+  (
+   (c/postavi_igru game_name (:username (:session request)))
+   (empty-response)
+   )
+  )
+
+(defn start-game-handler [{params :params :as request}]
+  (start-new-game request (params "game_name"))
+  )
 
  
-(defn join_game [request game_name game])
+(defs join_game [request game_name game]
+  (c/join_game (symbol game) (:username (:session request)))
+  (empty-response))
 
-(defn play [request game]
-  "procitace koordinate iz requesta"
-  )
+(defn join-game-handler [{params :params :as request}]
+  (join_game request (params "game_name") (params "game_uid")))
+
+(defs play [request]
+  (let [username (:username (:session request))
+        guid (:guid (:session request))
+        params (:params request)
+        [x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])
+        game (:game (:session request))
+        board_fields (c/transfer-board-koords x y game)
+        flds [:xfield board_fields, :yfield board_fields]
+        ]
+    (when-let [partija (c/play-game guid username flds )]
+      (enqueue coords_inq (j/json-str flds)))))
 
 (defn login-handler [{params :params , session :session}]
   (if-let [sess(login (params "username") :firstsite session)]
@@ -67,12 +86,6 @@ ovo treba da zove samo to"
     (empty-response)
     ))
 
-
-(defn longpoll 
-  "common function for all long poll requests"
-  [ch q]
-  (longpoll-general ch q identity))
-  
 (defn longpoll-general
   "boilerplate with the channel, queueue and the transformer function"
   [ch q f]
@@ -82,19 +95,18 @@ ovo treba da zove samo to"
 	       (enqueue ch
 			{:status 200, :headers {"content-type" "text/plain"}, :body (f x)})))))
 
-(defn pending_invitations
+(defn longpoll 
+  "common function for all long poll requests"
+  [ch q]
+  (longpoll-general ch q identity))
+
+(defn pending-invitations
   "read pending game invitations. queue is just a trigger"
   [ch]
   (let [game-invitations (c/get-game-invitations :soba :igra)]
     (longpoll-general ch (:game-list-channel @c/soba)
-		      (fn[x] game-invitations))))
-!!OVO VEROVATNO NECE MOCI.TREBA ZA SVAKI ELEMENT IS GAME-INVITATIONS
-DA SE POZOVE LONGPOLL-GENERAL (JER CU INACE DA URADIM ENQUEUE
-				   SVEGA. MADA KADA MALO BOLJE
-				   RAZMISLIM, KOJA JE RAZLIKA?? TREBA
-				   SAMO DA URADIM JSON KONVERZIJU, I
-				   DA CITAM IZ JAVA SKRIPTA
-  
+		      (fn[x] (j/json-str game-invitations)))))
+
 
 (defn tictactoehandler_out [ch request]
   (longpoll ch coords_inq))
@@ -125,6 +137,9 @@ DA SE POZOVE LONGPOLL-GENERAL (JER CU INACE DA URADIM ENQUEUE
 	    ["tictactoe"] (wrap-params tictactoehandler_in)
 	    ["fieldsout"] (wrap-aleph-handler tictactoehandler_out)
 	    ["login"] (wrap-params login-handler)
+            ["pending"] (wrap-aleph-handler pending-invitations)
+            ["startgame"] (wrap-params start-game-handler)
+            ["joingame"] (wrap-params join-game-handler)
             ))
 
 (def stop (start-http-server (wrap-ring-handler ruter) {:port 8080}))

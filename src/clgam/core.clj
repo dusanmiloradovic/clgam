@@ -144,7 +144,7 @@
 		 (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))}))))))))))
 
 
-(defn play_game [guid igrac [korx kory] & figura]
+(defn play-game [guid igrac [korx kory] & figura]
   (let [partija (@igre guid)
 	figura_p (if figura figura ((@igraci igrac)0))]
     (play partija (kor korx kory) igrac figura_p))
