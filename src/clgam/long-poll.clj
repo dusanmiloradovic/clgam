@@ -37,15 +37,18 @@ pomocu long-pollinga ili websocketa"
   `(defn ~fname [~request ~@rest]
      (with-session ~request ~body)))
 
-(defs start-new-game
+(defn start-new-game
   [request game_name]
-  (
-   (c/postavi_igru game_name (:username (:session request)))
-   (empty-response)
-   )
+   (do
+     (println (str "ojsa" , (:session request), (:username (:session request)), game_name))
+     (c/postavi_igru game_name (:username (:session request)))
+     (println "dosao dovde")
+     (empty-response)
+     )
   )
 
 (defn start-game-handler [{params :params :as request}]
+  (println (str "ohoho" params))
   (start-new-game request (params "game_name"))
   )
 
@@ -56,6 +59,9 @@ pomocu long-pollinga ili websocketa"
 
 (defn join-game-handler [{params :params :as request}]
   (join_game request (params "game_name") (params "game_uid")))
+
+(def coords_inq (channel))
+(receive-all coords_inq (fn[_]))
 
 (defs play [request]
   (let [username (:username (:session request))
@@ -77,8 +83,6 @@ pomocu long-pollinga ili websocketa"
     
 (def ulazniq (channel))
 
-(def coords_inq (channel))
-(receive-all coords_inq (fn[_]))
 
 (defn tictactoehandler_in [{params :params}]
   (let [[x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])]
