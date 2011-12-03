@@ -30,22 +30,17 @@ pomocu long-pollinga ili websocketa"
 
 (defmacro with-session [request & body]
   `(let [session# (:session ~request)]
-     (if (and session# (:username session#))
-       ~body)))
+     (when (and session# (:username session#))
+       (do ~@body))))
 
 (defmacro defs [fname [request & rest] & body]
   `(defn ~fname [~request ~@rest]
-     (with-session ~request ~body)))
+     (with-session ~request ~@body)))
 
-(defn start-new-game
+(defs start-new-game
   [request game_name]
-   (do
-     (println (str "ojsa" , (:session request), (:username (:session request)), game_name))
-     (c/postavi_igru game_name (:username (:session request)))
-     (println "dosao dovde")
-     (empty-response)
-     )
-  )
+      (c/postavi_igru game_name (:username (:session request)))
+      (empty-response))
 
 (defn start-game-handler [{params :params :as request}]
   (println (str "ohoho" params))
