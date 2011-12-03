@@ -3,11 +3,11 @@ $(document).ready(function(){
 		sendCoords(e,$(this));
 	    });
 	$('#sgame').ajaxForm(function(){
-			$('#startgame').hide();
+		$('#startgame').hide();
 	    });
 
-    waitForMsg();
-           
+	waitForMsg();
+	waitForInvitations();
     });
 
 $(window).load(function (e){
@@ -15,7 +15,7 @@ $(window).load(function (e){
 	    xsize:$('#brdimg').width(),
 	    ysize:$('#brdimg').height()
 	};
-});
+    });
 
 	
 function sendCoords(e,t){
@@ -25,37 +25,48 @@ function sendCoords(e,t){
 }
 
 function displayField(data){
-	       var xField=jQuery.parseJSON(data).xfield;
-       	       var yField=jQuery.parseJSON(data).yfield;
-	       var xDraw=(xField+0.5)* ($.board.xsize/3);
-	       var yDraw=(yField+0.5)* ($.board.ysize/3);
-	       $("#polje_"+xField+"_"+yField).remove();
-	       obja=$("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' src='img/figura.jpg' /> </div>");
-	       $("#igra").append(obja.css(
-		   {'text-align':'center','position':'absolute','z-index':'1', 'left':(xDraw+'px'), 'top':(yDraw+'px')}
-					 ));
-       	       var dOffsetx=obja.width()/2;
-       	       var dOffsety=obja.height()/2;
-	       obja.css({'left':'-='+dOffsetx,'top':'-='+dOffsety});
+    var xField=jQuery.parseJSON(data).xfield;
+    var yField=jQuery.parseJSON(data).yfield;
+    var xDraw=(xField+0.5)* ($.board.xsize/3);
+    var yDraw=(yField+0.5)* ($.board.ysize/3);
+    $("#polje_"+xField+"_"+yField).remove();
+    obja=$("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' src='img/figura.jpg' /> </div>");
+    $("#igra").append(obja.css(
+			       {'text-align':'center','position':'absolute','z-index':'1', 'left':(xDraw+'px'), 'top':(yDraw+'px')}
+			       ));
+    var dOffsetx=obja.width()/2;
+    var dOffsety=obja.height()/2;
+    obja.css({'left':'-='+dOffsetx,'top':'-='+dOffsety});
 
-	   }
+}
 
-    function waitForMsg(){
+
+function wForMsg(sUrl, successFunction){
       
-        $.ajax({
+    $.ajax({
             type: "GET",
-            url: "fieldsout",
+		url: sUrl,
 
-            async: true, /* If set to non-async, browser shows page as "Loading.."*/
-            cache: false,
-            timeout:50000, /* Timeout in ms */
+		async: true, /* If set to non-async, browser shows page as "Loading.."*/
+		cache: false,
+		timeout:50000, /* Timeout in ms */
 
-            success: function(data){ /* called when request to barge.php completes */
-                displayField(data); /* Add response to a .msg div (with the "new" class)*/
-		waitForMsg();
+		success: function(data){ /* called when request to barge.php completes */
+                successFunction(data); /* Add response to a .msg div (with the "new" class)*/
+		wForMsg(sUrl,successFunction);
             },
-            error: function(XMLHttpRequest, textStatus, errorThrown){
-	    	waitForMsg();
+		error: function(XMLHttpRequest, textStatus, errorThrown){
+    		wForMsg(sUrl,successFunction);
             }
         });
-    };
+};
+
+function waitForMsg(){
+    wForMsg("fieldsout",displayField);
+}
+
+function waitForInvitations(){
+    wForMsg("pending", function(data) { alert(data);});
+}
+
+
