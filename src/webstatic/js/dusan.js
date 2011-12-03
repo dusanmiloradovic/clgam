@@ -2,6 +2,9 @@ $(document).ready(function(){
 	$('#brdimg').click(function(e){
 		sendCoords(e,$(this));
 	    });
+	$('#sgame').ajaxForm(function(){
+			$('#startgame').hide();
+	    });
 
     waitForMsg();
            
