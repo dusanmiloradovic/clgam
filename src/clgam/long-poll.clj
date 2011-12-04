@@ -22,7 +22,6 @@ pomocu long-pollinga ili websocketa"
 (comment Kasnije ce da se naravno napravi pravi login modul)
 
 (defn login [username site session]
-  (println (str "Usao u login" username site session))
   "za sada cu da zanemarim sajt, ali kasnije ce da se svako loguje na svoj"
   (when (contains?  igraci username)
     (assoc session :username username)
@@ -43,7 +42,6 @@ pomocu long-pollinga ili websocketa"
       (empty-response))
 
 (defn start-game-handler [{params :params :as request}]
-  (println (str "ohoho" params))
   (start-new-game request (params "game_name"))
   )
 
@@ -88,11 +86,12 @@ pomocu long-pollinga ili websocketa"
 (defn longpoll-general
   "boilerplate with the channel, queueue and the transformer function"
   [ch q f]
-  (when (not (or (closed? ch) (closed? q)))
+  (when(not (or (closed? ch) (closed? q)))
     (receive (fork q)
 	     (fn[x]
 	       (enqueue ch
 			{:status 200, :headers {"content-type" "text/plain"}, :body (f x)})))))
+
 
 (defn longpoll 
   "common function for all long poll requests"
@@ -103,7 +102,7 @@ pomocu long-pollinga ili websocketa"
   "read pending game invitations. queue is just a trigger"
   [ch request]
   (let [game-invitations (c/get-game-invitations :soba :igra)]
-    (println (str "$$$$$$$$$$" game-invitations))
+    (println (str "->" game-invitations))
     (longpoll-general ch (:game-list-channel @c/soba)
 		      (fn[x] (j/json-str game-invitations)))))
 

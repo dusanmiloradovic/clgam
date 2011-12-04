@@ -6,9 +6,6 @@ $(document).ready(function(){
 	$.post("startgame",{game_name:"tictactoe"});
     });
 
-	$('#sgame').ajaxForm(function(){
-		$('#startgame').hide();
-	    });
 
 	waitForMsg();
 	waitForInvitations();
@@ -56,13 +53,14 @@ function wForMsg(sUrl, successFunction){
 		timeout:50000, /* Timeout in ms */
 
 		success: function(data){ /* called when request to barge.php completes */
+		    successFunction(data);
 		wForMsg(sUrl,successFunction);
             },
 		error: function(XMLHttpRequest, textStatus, errorThrown){
     		wForMsg(sUrl,successFunction);
             }
         });
-}
+};
 
 function waitForMsg(){
     wForMsg("fieldsout",displayField);
