@@ -42,32 +42,45 @@ function displayField(data){
 }
 
 
-function wForMsg(sUrl, successFunction){
-      
-    $.ajax({
+function waitForMsg(){
+     $.ajax({
             type: "GET",
-		url: sUrl,
+		url: "fieldsout",
 
 		async: true, /* If set to non-async, browser shows page as "Loading.."*/
 		cache: false,
 		timeout:50000, /* Timeout in ms */
 
 		success: function(data){ /* called when request to barge.php completes */
-		    successFunction(data);
-		wForMsg(sUrl,successFunction);
+		    
+		displayField(data);
+		waitForMsg();
             },
 		error: function(XMLHttpRequest, textStatus, errorThrown){
-    		wForMsg(sUrl,successFunction);
-            }
+		waitForMsg();
+	    }
         });
-};
-
-function waitForMsg(){
-    wForMsg("fieldsout",displayField);
 }
 
 function waitForInvitations(){
-    wForMsg("pending", function(data) { alert(data);});
+    $.ajax({
+            type: "GET",
+		url: "pending",
+
+		async: true, /* If set to non-async, browser shows page as "Loading.."*/
+		cache: false,
+		timeout:50000, /* Timeout in ms */
+
+		success: function(data){ /* called when request to barge.php completes */
+		    
+		alert(data);
+		waitForInvitations();
+            },
+		error: function(XMLHttpRequest, textStatus, errorThrown){
+		waitForInvitations();
+	    }
+        });
 }
+
 
 
