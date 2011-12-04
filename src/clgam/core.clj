@@ -13,8 +13,6 @@
 	 objavljena, ili da stara vise nije raspoloziva. Ne mogu da koristim kanal da
 	 distribuiram koje su igre raspolozive jer nemam nacina da mi se registruje kada sklonim igru iz kanala. Pitanje je isto kako da sklonim igru iz kanala. Ovako ce da se u ovaj kanal gura i kada se objavi igra i kada se odjavi igra. Tako da ce ovaj kanal biti sasvim dovoljan da opsluzuje i objavljivanje igara i igre koje su u toku. Stalno se gura u ovaj kanal, i to sluzi samo kao trigger za ajax)
 
-(receive-all (:game-list-channel @soba) (fn[_]))
-
 (def igraci (ref {}))
 
 (def igre (ref {}))
@@ -28,25 +26,30 @@
 	       (clojure.set/difference
 		(set (filter (comp not keyword?) (keys @soba)))
 		(set (keys @igre)))))
+
+(receive-all (:game-list-channel @soba) (fn[x] (println (str "***************" x (get-game-invitations :a :b)))))
+
+
+
   
 
 
 (defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
   [igra username]
-  (let [game_id (gensym) , figura (random_igrac)]
-    
-    (dosync
-     (alter soba assoc game_id (list username))
-     (alter igraci assoc username [figura game_id])
-     (enqueue (:game-list-channel @soba) [game_id username])
-     (let [c (channel)]
+  (let [game_id (gensym) , figura (random_igrac) , c (channel)]
+    (do
+      (dosync
+       (alter soba assoc game_id (list username))
+       (alter igraci assoc username [figura game_id])
        (alter kanali assoc game_id c)
-       (receive-all c (fn [x]
-                        (when-let [igra (@igre game_id)]
-                          (dosync
-                           (alter igra #(merge % x)))))))
-     )))
+       )
+      (enqueue (:game-list-channel @soba) [game_id username])
+      (receive-all c (fn [x]
+		       (when-let [igra (@igre game_id)]
+			 (dosync
+			  (alter igra #(merge % x))))))))
+  )
 
 (defn place [tabla figura koordinate]
   "tabla je closure sa figurama  i funkcijom validacije polja"

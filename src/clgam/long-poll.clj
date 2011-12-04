@@ -88,7 +88,7 @@ pomocu long-pollinga ili websocketa"
 (defn longpoll-general
   "boilerplate with the channel, queueue and the transformer function"
   [ch q f]
-  (when (not (closed? ch))
+  (when (not (or (closed? ch) (closed? q)))
     (receive (fork q)
 	     (fn[x]
 	       (enqueue ch
@@ -101,8 +101,9 @@ pomocu long-pollinga ili websocketa"
 
 (defn pending-invitations
   "read pending game invitations. queue is just a trigger"
-  [ch]
+  [ch request]
   (let [game-invitations (c/get-game-invitations :soba :igra)]
+    (println (str "$$$$$$$$$$" game-invitations))
     (longpoll-general ch (:game-list-channel @c/soba)
 		      (fn[x] (j/json-str game-invitations)))))
 
