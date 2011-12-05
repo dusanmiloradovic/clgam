@@ -73,13 +73,31 @@ function waitForInvitations(){
 
 		success: function(data){ /* called when request to barge.php completes */
 		    
-		alert(data);
+		printInvitations(data);
 		waitForInvitations();
             },
 		error: function(XMLHttpRequest, textStatus, errorThrown){
 		waitForInvitations();
 	    }
         });
+}
+
+function printInvitations(data){
+    var jData=$.parseJSON(data);
+    alert(data);
+    alert(jData);
+    var invitations="";
+    for (var prop in jData){
+	if (!prop.hasOwnProperty()){
+	    continue;
+	}
+	var val=jData[prop];
+	invitations+="("+prop+","+val+")\n";
+
+    }
+    alert(invitations);
+    $("#opengames").html(invitations);
+   
 }
 
 
