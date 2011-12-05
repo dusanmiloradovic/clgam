@@ -102,10 +102,11 @@ pomocu long-pollinga ili websocketa"
 (defn pending-invitations
   "read pending game invitations. queue is just a trigger"
   [ch request]
-  (let [game-invitations (c/get-game-invitations :soba :igra)]
-    (println (str "->" game-invitations))
-    (longpoll-general ch (:game-list-channel @c/soba)
-		      (fn[x] (j/json-str game-invitations)))))
+  (longpoll-general ch (:game-list-channel @c/soba)
+		    (fn[x] 
+		      (let [game-invitations (c/get-game-invitations :soba :igra)]
+			(println (str "->" game-invitations))
+			(j/json-str game-invitations)))))
 
 
 (defn tictactoehandler_out [ch request]

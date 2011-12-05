@@ -84,18 +84,12 @@ function waitForInvitations(){
 
 function printInvitations(data){
     var jData=$.parseJSON(data);
-    alert(data);
-    alert(jData);
     var invitations="";
     for (var prop in jData){
-	if (!prop.hasOwnProperty()){
-	    continue;
-	}
 	var val=jData[prop];
-	invitations+="("+prop+","+val+")\n";
+	invitations+="("+prop+","+val+")<br/>";
 
     }
-    alert(invitations);
     $("#opengames").html(invitations);
    
 }
