@@ -27,7 +27,7 @@
 		(set (filter (comp not keyword?) (keys @soba)))
 		(set (keys @igre)))))
 
-(receive-all (:game-list-channel @soba) (fn[x] (println (str "***************" x (get-game-invitations :a :b)))))
+(receive-all (:game-list-channel @soba) (fn[x] ))
 
 
 
@@ -94,18 +94,23 @@
 (defn join_game
   "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
   [game_uid username]
+  (println (str "join_game" game_uid username))
   (let [svi_igraci (cons username (@soba game_uid))
 	zauzete_figure (map #((% 1)0) (select-keys @igraci (@soba game_uid)))
 	figura (random_igrac zauzete_figure)
 	]
     (when figura
-      (dosync
-       (alter soba assoc game_uid (cons username (@soba game_uid)))
-       (alter igraci assoc username [figura game_uid])
-       (enqueue (:game-list-channel @soba) [game_uid username])
-       (when (= (count svi_igraci) 2)
-         (alter igre assoc game_uid (startuj-partiju svi_igraci tictactoeboard tictactoeevents game_uid)))
-       ))))
+      (do
+	(dosync
+	 (alter soba assoc game_uid (cons username (@soba game_uid)))
+	 (alter igraci assoc username [figura game_uid])
+	 (when (= (count svi_igraci) 2)
+	   (alter igre assoc game_uid (startuj-partiju svi_igraci tictactoeboard tictactoeevents game_uid)))
+	 )
+	(enqueue (:game-list-channel @soba) [game_uid username])
+	))))
+      
+
 
 (defn check_rules[partija igrac koordinate figura]
   (let [ev_functions (:event_fx @partija)

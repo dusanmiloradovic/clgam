@@ -105,7 +105,6 @@ pomocu long-pollinga ili websocketa"
   (longpoll-general ch (:game-list-channel @c/soba)
 		    (fn[x] 
 		      (let [game-invitations (c/get-game-invitations :soba :igra)]
-			(println (str "->" game-invitations))
 			(j/json-str game-invitations)))))
 
 
@@ -143,4 +142,4 @@ pomocu long-pollinga ili websocketa"
             ["joingame"] (wrap-params join-game-handler)
             ))
 
-(def stop (start-http-server (wrap-ring-handler ruter) {:port 8080}))
+(defonce stop (start-http-server (wrap-ring-handler #'ruter) {:port 8080}))

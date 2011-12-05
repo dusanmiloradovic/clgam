@@ -87,8 +87,7 @@ function printInvitations(data){
     var invitations="";
     for (var prop in jData){
 	var val=jData[prop];
-	invitations+="("+prop+","+val+")<br/>";
-
+	invitations+="<a href='/joingame?gamename=tictactoe&game_uid="+prop+"'>"+val+"</a><br/>";
     }
     $("#opengames").html(invitations);
    
