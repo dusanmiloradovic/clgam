@@ -15,7 +15,7 @@
 
 (def igraci #{"kristina","ruzica","dusan","pera","mika","laza"})
 
-(def symbol-db {"tictactoe" {"W" "img/white.jpg", "B" "img/black.jpg"} })
+(def symbol-db {"tictactoe" {"W" "img/o.jpg", "B" "img/x.jpg"} })
 
 
 (comment ovo ce kao deo specifikacije igre da bude u mongo definiciji)
@@ -61,8 +61,10 @@ pomocu long-pollinga ili websocketa"
 
  
 (defs join_game [request game_name game]
-  (c/join_game (symbol game) (:username (:session request)))
-  (empty-response))
+  (if
+      (c/join_game (symbol game) (:username (:session request)))
+    (-> (empty-response) (assoc :session (merge (:session request) {:guid game :game game_name})))
+    (empty-response)))
 
 (defn join-game-handler [{params :params :as request}]
   (join_game request (params "game_name") (params "game_uid")))
@@ -77,16 +79,21 @@ pomocu long-pollinga ili websocketa"
 (receive-all coords_inq (fn[_]))
 
 (defs play [request]
+  (println (str "session:" (:session request)))
+  (println @c/igraci)
   (let [username (:username (:session request))
         guid (:guid (:session request))
         params (:params request)
         [x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])
         game (:game (:session request))
         board_fields (c/transfer-board-koords x y game)
-        flds [:xfield board_fields, :yfield board_fields]
+        flds [:xfield board_fields, :yfield board_fields , :symbol ((@c/igraci username) 0) ]
         ]
+    "kada imam samo jednu figuru po igracu, figure ce da se uzimaju iz difolta, inace ce iz js-a.
+necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
     (when-let [partija (c/play-game guid username flds )]
-      (enqueue coords_inq (j/json-str flds)))))
+      (enqueue coords_inq (j/json-str flds))))
+  (empty-response))
 
 (defn login-handler [{params :params , session :session}]
   (if-let [sess(login (params "username") :firstsite session)]
@@ -154,7 +161,7 @@ pomocu long-pollinga ili websocketa"
             ["queuein"] (wrap-params fillq)
             ["poll"]
             (wrap-params (wrap-aleph-handler long-poll-handler))
-	    ["tictactoe"] (wrap-params tictactoehandler_in)
+	    ["tictactoe"] (wrap-params play)
 	    ["fieldsout"] (wrap-aleph-handler tictactoehandler_out)
 	    ["login"] (wrap-params login-handler)
             ["pending"] (wrap-aleph-handler pending-invitations)

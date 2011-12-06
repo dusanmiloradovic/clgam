@@ -31,12 +31,15 @@ function sendCoords(e,t){
 }
 
 function displayField(data){
-    var xField=jQuery.parseJSON(data).xfield;
-    var yField=jQuery.parseJSON(data).yfield;
+    var jData=$.parseJSON(data);
+    var xField=jData.xfield;
+    var yField=jData.yfield;
+    var symbol=jData.symbol;
+    var symbolURL=$.symbols[symbol];
     var xDraw=(xField+0.5)* ($.board.xsize/3);
     var yDraw=(yField+0.5)* ($.board.ysize/3);
     $("#polje_"+xField+"_"+yField).remove();
-    obja=$("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' src='img/figura.jpg' /> </div>");
+    obja=$("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' src='"+symbolURL+"' /> </div>");
     $("#igra").append(obja.css(
 	{'text-align':'center','position':'absolute','z-index':'1', 'left':(xDraw+'px'), 'top':(yDraw+'px')}
     ));
@@ -89,7 +92,7 @@ function waitForInvitations(){
 
 
 function joinGame(sGameName,sGameUid){
-    $.post("joingame",{gamename:sGameName, game_uid:sGameUid},
+    $.post("joingame",{game_name:sGameName, game_uid:sGameUid},
 	   function(data){
 	       $("igra").show();
 	   });

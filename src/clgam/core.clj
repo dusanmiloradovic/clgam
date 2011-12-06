@@ -205,6 +205,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
       :go [19 19]})
 
 (defn transfer-board-koords[x y game]
+  (println (str "transferring " x ":" y ":" game))
   (let [[xb yb] (boards (keyword game))]
     {:xfield (int (* x xb)) , :yfield (int (* y yb))}
     ))
