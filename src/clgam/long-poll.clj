@@ -126,6 +126,7 @@ pomocu long-pollinga ili websocketa"
   (longpoll ch ulazniq)
   )
 
+
 (def ruter (app
             (wrap-file-info)
             (wrap-file "src/webstatic")

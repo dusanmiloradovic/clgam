@@ -90,9 +90,6 @@ function joinGame(sGameName,sGameUid){
 	   });
 }
 
-
-
-}
 function printInvitations(data){
     var jData=$.parseJSON(data);
     var invitations="";

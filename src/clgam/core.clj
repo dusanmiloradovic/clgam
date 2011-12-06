@@ -37,19 +37,21 @@
 (defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
   [igra username]
-  (let [game_id (gensym) , figura (random_igrac) , c (channel)]
-    (do
-      (dosync
-       (alter soba assoc game_id (list username))
-       (alter igraci assoc username [figura game_id])
-       (alter kanali assoc game_id c)
-       )
-      (enqueue (:game-list-channel @soba) [game_id username])
-      (receive-all c (fn [x]
-		       (when-let [igra (@igre game_id)]
-			 (dosync
-			  (alter igra #(merge % x))))))))
-  )
+  (when-not (@igraci username)
+    "ovo ce biti ok kada imam samo jednu igru. za vise igara treba da
+proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise od jedne igre, razmislicu"
+    (let [game_id (gensym) , figura (random_igrac) , c (channel)]
+      (do
+	(dosync
+	 (alter soba assoc game_id (list username))
+	 (alter igraci assoc username [figura game_id])
+	 (alter kanali assoc game_id c)
+	 )
+	(enqueue (:game-list-channel @soba) [game_id username])
+	(receive-all c (fn [x]
+			 (when-let [igra (@igre game_id)]
+			   (dosync
+			    (alter igra #(merge % x))))))))))
 
 (defn place [tabla figura koordinate]
   "tabla je closure sa figurama  i funkcijom validacije polja"
@@ -94,14 +96,16 @@
 (defn join_game
   "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
   [game_uid username]
-  (println (str "join_game" game_uid username))
   (let [svi_igraci (cons username (@soba game_uid))
 	zauzete_figure (map #((% 1)0) (select-keys @igraci (@soba game_uid)))
 	figura (random_igrac zauzete_figure)
 	]
-    (when figura
+    (when (and figura (not (some #(= username %) (@soba game_uid))))
+      "ne mozaes da se pridruzis svojoj igri"
       (do
 	(dosync
+	 (when (@soba ((@igraci username) 1))
+	   (alter soba dissoc ((@igraci username) 1)))
 	 (alter soba assoc game_uid (cons username (@soba game_uid)))
 	 (alter igraci assoc username [figura game_uid])
 	 (when (= (count svi_igraci) 2)
