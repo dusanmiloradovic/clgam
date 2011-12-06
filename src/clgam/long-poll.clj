@@ -14,12 +14,25 @@
   )
 
 (def igraci #{"kristina","ruzica","dusan","pera","mika","laza"})
+
+(def symbol-db {"tictactoe" {"W" "img/white.jpg", "B" "img/black.jpg"} })
+
+
+(comment ovo ce kao deo specifikacije igre da bude u mongo definiciji)
+
 (defn empty-response
   "Koristim za AJAX pozive gde nije bitan response, nego se response dobija
 pomocu long-pollinga ili websocketa"
   [] {:status 200
       :headers {"content-type" "text/plain"}
       :body ""})
+
+(defn json-response[output]
+  {:status 200
+   :headers {"content-type" "application/json"}
+   :body (j/json-str output)}
+  )
+
 (comment Kasnije ce da se naravno napravi pravi login modul)
 
 (defn login [username site session]
@@ -53,6 +66,12 @@ pomocu long-pollinga ili websocketa"
 
 (defn join-game-handler [{params :params :as request}]
   (join_game request (params "game_name") (params "game_uid")))
+
+(defn get-game-definition 
+  "za sada ce da vraca samo tabelu simbola, kasnije treba da se doda sve ostalo"
+  [{params :params :as request}]
+  (json-response (symbol-db (params "game_name"))))
+  
 
 (def coords_inq (channel))
 (receive-all coords_inq (fn[_]))
@@ -141,6 +160,7 @@ pomocu long-pollinga ili websocketa"
             ["pending"] (wrap-aleph-handler pending-invitations)
             ["startgame"] (wrap-params start-game-handler)
             ["joingame"] (wrap-params join-game-handler)
+	    ["gamedef"] (wrap-params get-game-definition)
             ))
 
 (defonce stop (start-http-server (wrap-ring-handler #'ruter) {:port 8080}))

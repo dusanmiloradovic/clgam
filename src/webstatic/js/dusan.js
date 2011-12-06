@@ -5,8 +5,7 @@ $(document).ready(function(){
     $('#sg123').click(function(e){
 	$.post("startgame",{game_name:"tictactoe"});
     });
-    $("igra").hide();
-
+    loadSymbols();
     waitForMsg();
     waitForInvitations();
 });
@@ -19,6 +18,12 @@ $(window).load(function (e){
 });
 
 
+
+function loadSymbols(){
+    $.post("gamedef",{game_name:"tictactoe"}, function(data){
+	$.symbols=$.parseJSON(data);
+    });
+}
 function sendCoords(e,t){
     var x=e.pageX - t.offset().left;
     var y=e.pageY - t.offset().top;
