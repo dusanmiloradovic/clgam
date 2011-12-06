@@ -159,6 +159,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 (defn play-game [guid igrac [korx kory] & figura]
   (let [partija (@igre guid)
 	figura_p (if figura figura ((@igraci igrac)0))]
+    (println (str "&&&&" guid ":" partija ":" korx ":" kory ":" igrac ":" figura_p))
     (play partija (kor korx kory) igrac figura_p))
   )
 
