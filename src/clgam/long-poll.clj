@@ -120,7 +120,7 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
     (receive (fork q)
 	     (fn[x]
 	       (let [resp {:status 200, :headers {"content-type" "text/plain"}, :body (f x)}
-		     sess (when sf (sf x))]
+		     sess (when sf ((first sf) x))]
 		 (enqueue ch
 			  (if sess
 			    (-> resp (assoc :session sess))
@@ -147,7 +147,7 @@ za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da na
 			  (j/json-str game-invitations)))
 		      (fn[x]
 			"funkcija sesije"
-			(let [		    igrac (@igraci username)
+			(let [igrac (@c/igraci username)
 			      guid (when igrac (igrac 1))
 			      ]
 			  (when guid
