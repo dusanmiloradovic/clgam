@@ -15,6 +15,7 @@ $(window).load(function (e){
 	xsize:$('#brdimg').width(),
 	ysize:$('#brdimg').height()
     };
+    $("igra").hide();
 });
 
 
@@ -34,7 +35,7 @@ function displayField(data){
     var jData=$.parseJSON(data);
     var xField=jData.xfield;
     var yField=jData.yfield;
-    var symbol=jData.symbol;
+    var symbol=jData.picsym;
     var symbolURL=$.symbols[symbol];
     var xDraw=(xField+0.5)* ($.board.xsize/3);
     var yDraw=(yField+0.5)* ($.board.ysize/3);

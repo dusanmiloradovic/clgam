@@ -86,14 +86,15 @@ pomocu long-pollinga ili websocketa"
         params (:params request)
         [x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])
         game (:game (:session request))
-        board_fields (c/transfer-board-koords x y game)
-        flds [:xfield board_fields, :yfield board_fields , :symbol ((@c/igraci username) 0) ]
+        board_fields (assoc (c/transfer-board-koords x y game) :picsym ((@c/igraci username) 0))
         ]
     "kada imam samo jednu figuru po igracu, figure ce da se uzimaju iz difolta, inace ce iz js-a.
 necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
-    (when-let [partija (c/play-game guid username flds )]
-      (enqueue coords_inq (j/json-str flds))))
-  (empty-response))
+    (when-let [partija (c/play-game guid username board_fields )]
+      (println (str "Usao ovde" (j/json-str board_fields)))
+      (enqueue coords_inq (j/json-str board_fields))
+      )
+  (empty-response)))
 
 (defn login-handler [{params :params , session :session}]
   (if-let [sess(login (params "username") :firstsite session)]
@@ -103,12 +104,14 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
     
 (def ulazniq (channel))
 
+(comment
+  (defn tictactoehandler_in [{params :params}]
+    (let [[x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])]
+      (enqueue coords_inq (j/json-str (c/transfer-board-koords x y "tictactoe")))
+      (empty-response)
+      ))
+  )
 
-(defn tictactoehandler_in [{params :params}]
-  (let [[x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])]
-    (enqueue coords_inq (j/json-str (c/transfer-board-koords x y "tictactoe")))
-    (empty-response)
-    ))
 
 (defn longpoll-general
   "boilerplate with the channel, queueue and the transformer function"
