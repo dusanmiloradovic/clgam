@@ -115,12 +115,17 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
 
 (defn longpoll-general
   "boilerplate with the channel, queueue and the transformer function"
-  [ch q f]
+  [ch q f & sf]
   (when(not (or (closed? ch) (closed? q)))
     (receive (fork q)
 	     (fn[x]
-	       (enqueue ch
-			{:status 200, :headers {"content-type" "text/plain"}, :body (f x)})))))
+	       (let [resp {:status 200, :headers {"content-type" "text/plain"}, :body (f x)}
+		     sess (when sf (sf x))]
+		 (enqueue ch
+			  (if sess
+			    (-> resp (assoc :session sess))
+			    resp)))))))
+
 
 
 (defn longpoll 
@@ -131,10 +136,24 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
 (defn pending-invitations
   "read pending game invitations. queue is just a trigger"
   [ch request]
-  (longpoll-general ch (:game-list-channel @c/soba)
-		    (fn[x] 
-		      (let [game-invitations (c/get-game-invitations :soba :igra)]
-			(j/json-str game-invitations)))))
+  "ideja je da ako je neka igra pocela, a ja sam je startovao (ili se pridruzrio pre nego sto je pocela
+za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da nastavim"
+  (let [username (:username (:session request))
+	sess (:session request)]
+    (longpoll-general ch (:game-list-channel @c/soba)
+		      (fn[x]
+			"funkcija body"
+			(let [game-invitations (c/get-game-invitations :soba :igra)]
+			  (j/json-str game-invitations)))
+		      (fn[x]
+			"funkcija sesije"
+			(let [		    igrac (@igraci username)
+			      guid (when igrac (igrac 1))
+			      ]
+			  (when guid
+			    (merge sess {:guid guid :game "tictactoe"})))))))
+		      
+		    
 
 
 (defn tictactoehandler_out [ch request]

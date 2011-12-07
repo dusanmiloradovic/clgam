@@ -21,11 +21,8 @@ $(window).load(function (e){
 
 
 function loadSymbols(){
-    alert ("Loading symbols");
     $.post("gamedef",{game_name:"tictactoe"}, function(data){
-	alert ("Symbols loaded:"+data);
 	$.symbols=$.parseJSON(data);
-	alert ("Symbols parsed" + $.symbols);
     });
 }
 function sendCoords(e,t){
@@ -39,8 +36,6 @@ function displayField(data){
     var xField=jData.xfield;
     var yField=jData.yfield;
     var symbol=jData.picsym;
-    alert("symbol"+symbol);
-	alert ("Symbols parsed now" + $.symbols);
     var symbolURL=$.symbols[symbol];
     var xDraw=(xField+0.5)* ($.board.xsize/3);
     var yDraw=(yField+0.5)* ($.board.ysize/3);
