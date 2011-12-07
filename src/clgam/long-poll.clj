@@ -29,7 +29,7 @@ pomocu long-pollinga ili websocketa"
 
 (defn json-response[output]
   {:status 200
-   :headers {"content-type" "application/json"}
+   :headers {"content-type" "text/plain"}
    :body (j/json-str output)}
   )
 
