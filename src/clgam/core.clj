@@ -113,8 +113,11 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 	 )
 	(enqueue (:game-list-channel @soba) [game_uid username])
 	))))
-      
-
+      po
+(defn user_game [username]
+  (when-let [poceta-igra (@igraci username)]
+    [(poceta_igra username) "ticactoe"]))
+  
 
 (defn check_rules[partija igrac koordinate figura]
   (let [ev_functions (:event_fx @partija)
