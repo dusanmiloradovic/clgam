@@ -37,6 +37,21 @@ function displayField(data){
     var yField=jData.yfield;
     var symbol=jData.picsym;
     var symbolURL=$.symbols[symbol];
+    var xDraw=xField* ($.board.xsize/3);
+    var yDraw=yField* ($.board.ysize/3);
+    $("#polje_"+xField+"_"+yField).remove();
+    obja=$("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' class='displayed' src='"+symbolURL+"' /> </div>");
+    $("#igra").append(obja.css(
+	{'width':($.board.xsize/3)+'px', 'height':($.board.ysize/3)+'px','position':'absolute','z-index':'1', 'left':(xDraw+'px'), 'top':(yDraw+'px')}
+    ));
+}
+
+function displayField_old(data){
+    var jData=$.parseJSON(data);
+    var xField=jData.xfield;
+    var yField=jData.yfield;
+    var symbol=jData.picsym;
+    var symbolURL=$.symbols[symbol];
     var xDraw=(xField+0.5)* ($.board.xsize/3);
     var yDraw=(yField+0.5)* ($.board.ysize/3);
     $("#polje_"+xField+"_"+yField).remove();
@@ -49,7 +64,6 @@ function displayField(data){
     obja.css({'left':'-='+dOffsetx,'top':'-='+dOffsety});
 
 }
-
 
 function waitForMsg(){
     $.ajax({
