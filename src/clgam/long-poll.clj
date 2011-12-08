@@ -82,10 +82,11 @@ pomocu long-pollinga ili websocketa"
   (println (str "session:" (:session request)))
   (println @c/igraci)
   (let [username (:username (:session request))
-        guid (:guid (:session request))
+        gm (c/user_game username)
+        guid (gm 0)
         params (:params request)
         [x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])
-        game (:game (:session request))
+        game (gm 1)
         board_fields (assoc (c/transfer-board-koords x y game) :picsym ((@c/igraci username) 0))
         ]
     "kada imam samo jednu figuru po igracu, figure ce da se uzimaju iz difolta, inace ce iz js-a.
@@ -113,18 +114,14 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
   )
 
 
+
 (defn longpoll-general
   "boilerplate with the channel, queueue and the transformer function"
-  [ch q f & sf]
+  [ch q f]
   (when(not (or (closed? ch) (closed? q)))
     (receive (fork q)
 	     (fn[x]
-	       (let [resp {:status 200, :headers {"content-type" "text/plain"}, :body (f x)}
-		     sess (when sf ((first sf) x))]
-		 (enqueue ch
-			  (if sess
-			    (-> resp (assoc :session sess))
-			    resp)))))))
+		 (enqueue ch {:status 200, :headers {"content-type" "text/plain"}, :body (f x)})))))
 
 
 
@@ -145,13 +142,7 @@ za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da na
 			"funkcija body"
 			(let [game-invitations (c/get-game-invitations :soba :igra)]
 			  (j/json-str game-invitations)))
-		      (fn[x]
-			"funkcija sesije"
-			(let [igrac (@c/igraci username)
-			      guid (when igrac (igrac 1))
-			      ]
-			  (when guid
-			    (merge sess {:guid guid :game "tictactoe"})))))))
+		      )))
 		      
 		    
 
