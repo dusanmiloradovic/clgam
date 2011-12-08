@@ -104,7 +104,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
       "ne mozaes da se pridruzis svojoj igri"
       (do
 	(dosync
-	 (when (@soba ((@igraci username) 1))
+	 (when (and (@igraci username) (@soba ((@igraci username) 1)))
 	   (alter soba dissoc ((@igraci username) 1)))
 	 (alter soba assoc game_uid (cons username (@soba game_uid)))
 	 (alter igraci assoc username [figura game_uid])
@@ -113,10 +113,10 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 	 )
 	(enqueue (:game-list-channel @soba) [game_uid username])
 	))))
-      po
+
 (defn user_game [username]
   (when-let [poceta-igra (@igraci username)]
-    [(poceta_igra username) "ticactoe"]))
+    [(poceta-igra 1) "ticactoe"]))
   
 
 (defn check_rules[partija igrac koordinate figura]
