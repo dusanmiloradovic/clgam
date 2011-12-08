@@ -116,7 +116,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 
 (defn user_game [username]
   (when-let [poceta-igra (@igraci username)]
-    [(poceta-igra 1) "ticactoe"]))
+    [(poceta-igra 1) "tictactoe"]))
   
 
 (defn check_rules[partija igrac koordinate figura]
