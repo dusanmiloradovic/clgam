@@ -25,7 +25,7 @@
       )))
 (defn popunjena-table[tabla]
   (not
-   (some true? (map #(some nil? %) t))))
+   (some true? (map #(some nil? %) tabla))))
   
 (defn kvadratna_tabla[n & pocetni_podaci]
   [(if pocetni_podaci
@@ -91,45 +91,48 @@
 
 (defn tictactoeevents[partija]
   (let [tabla (first (:tabla @partija)) , ttboard-f (fnext (:tabla @partija))]
-    [
-     {
-      :event
-      (fn mosha[igrac figura koordinate]
-	(or (= 3 (diag_up_connected tabla figura koordinate ttboard-f))
-	    (= 3 (diag_down_connected tabla figura koordinate ttboard-f))
-	    (= 3 (hor_connected tabla figura koordinate ttboard-f))
-	    (= 3 (ver_connected tabla figura koordinate ttboard-f))
-	    )
-	)
-      ,
-      :handler
-      {:game_over true , :winner (:sledeci_igrac @partija) }
-      }
-     {
-      :event
-      (fn c[igrac figura koordinate]
-	((comp not nil?)
-	 (figure tabla koordinate)
-	 )
-	)
-      :handler
-      {:invalid_move true}
-      
-      }
-     {
-      :event
-      (fn pop[igrac figura koordinate]
-        (popunjena-table tabla))
-      :handler
-      {:game_over true, :winner "draw"}
-      }
-     {
-     :event
-     (fn wrongppl[igrac figura koordinate]
-       (and (not (nil? (:sledeci_igrac @partija))) (not= (:sledeci_igrac @partija) igrac)))
-     :handler
-      {:invalid_move true :description "wrong player"}
-      }
-     ]
-    )
-  )
+    {:validations
+     [
+      {
+       :event
+       (fn c[igrac figura koordinate]
+         ((comp not nil?)
+          (figure tabla koordinate)
+          )
+         )
+       :handler
+       {:invalid_move true}
+       }
+      {
+       :event
+       (fn wrongppl[igrac figura koordinate]
+         (and (not (nil? (:sledeci_igrac @partija))) (not= (:sledeci_igrac @partija) igrac)))
+       :handler
+       {:invalid_move true :description "wrong player"}
+       } 
+      ],
+     :events
+     [
+      {
+       :event
+       (fn mosha[igrac figura koordinate]
+         (or (= 3 (diag_up_connected tabla figura koordinate ttboard-f))
+             (= 3 (diag_down_connected tabla figura koordinate ttboard-f))
+             (= 3 (hor_connected tabla figura koordinate ttboard-f))
+             (= 3 (ver_connected tabla figura koordinate ttboard-f))
+             )
+         )
+       ,
+       :handler
+       {:game_over true , :winner (:sledeci_igrac @partija) }
+       }
+      {
+       :event
+       (fn pop[igrac figura koordinate]
+         (popunjena-table tabla))
+       :handler
+       {:game_over true, :winner "draw"}
+       }
+      ]
+     }
+    ))

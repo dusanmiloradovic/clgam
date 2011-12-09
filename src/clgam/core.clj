@@ -44,6 +44,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 	 )
 	(enqueue (:game-list-channel @soba) [game_id username])
 	(receive-all c (fn [x]
+                         (println (str "Received -----> " x))
 			 (when-let [igra (@igre game_id)]
 			   (dosync
 			    (alter igra #(merge % x))))))))))
@@ -107,9 +108,10 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
   (when-let [poceta-igra (@igraci username)]
     [(poceta-igra 1) "tictactoe"]))
 
-(defn check_rules[partija igrac koordinate figura]
+(defn check_rules[partija igrac koordinate figura & validations?]
   (let [ev_functions (:event_fx @partija)
-        events (ev_functions partija)
+        events-h (ev_functions partija)
+        events (if validations? (:validations events-h) (:events events-h))
         game_uid (:game_uid @partija)
         game_channel (game_uid @kanali)
         ]
@@ -131,7 +133,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
     (let [tabla (:tabla @partija) ]
       (let [game_uid (:game_uid @partija) , game_channel (@kanali game_uid)
             kopija (receive-all (fork game_channel) (fn[_])),
-            rule_event_happened (check_rules partija igrac koordinate figura)
+            rule_event_happened (check_rules partija igrac koordinate figura true)
             ]
         (when
             (or (not rule_event_happened)
@@ -140,9 +142,12 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
                  kopija
                  (not (or  (:invalid_move @partija) (:game_over @partija)))))
           (let [nova_tabla (place tabla figura koordinate) pre_promene @partija]
-            (when nova_tabla
-              (dosync
-               (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))}))))))))))
+            (dp
+             (when nova_tabla
+               (dosync
+                (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))})))
+             (check_rules partija igrac koordinate figura false)
+             )))))))
 
 
 (defn play-game [guid igrac {:keys [xfield, yfield,picsym]}]
@@ -191,7 +196,6 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
       :go [19 19]})
 
 (defn transfer-board-koords[x y game]
-  (println (str "transferring " x ":" y ":" game))
   (let [[xb yb] (boards (keyword game))]
     {:xfield (int (* x xb)) , :yfield (int (* y yb))}
     ))
