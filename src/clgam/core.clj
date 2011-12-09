@@ -29,11 +29,6 @@
 
 (receive-all (:game-list-channel @soba) (fn[x] ))
 
-
-
-  
-
-
 (defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
   [igra username]
@@ -60,7 +55,6 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
       (cons
        (assoc tabla_podaci (:ycoord koordinate) (assoc (tabla_podaci (:ycoord koordinate)) (:xcoord koordinate) figura)) (next tabla)
        ))))
-
     
 (defn next_player [current_player players]
   (let [nextone
@@ -72,8 +66,6 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
     (if nextone
       nextone
       (first players))))
-
-
 
 (defrecord Partija [igraci tabla sledeci_igrac istorija_poteza event_fx game_uid])
 
@@ -89,9 +81,6 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 
 (defn startuj-partiju[igraci tabla event_fx game_uid]
   (ref  (Partija.  igraci tabla nil nil event_fx game_uid)))
-
-
-
 
 (defn join_game
   "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
@@ -117,7 +106,6 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 (defn user_game [username]
   (when-let [poceta-igra (@igraci username)]
     [(poceta-igra 1) "tictactoe"]))
-  
 
 (defn check_rules[partija igrac koordinate figura]
   (let [ev_functions (:event_fx @partija)
@@ -141,32 +129,27 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
     (dosync
      (alter partija merge {:invalid_move false}))
     (let [tabla (:tabla @partija) ]
-      (if (and (not (nil? (:sledeci_igrac @partija))) (not= (:sledeci_igrac @partija) igrac))
-	(println "Pogresan igrac")
-        (let [game_uid (:game_uid @partija) , game_channel (@kanali game_uid)
-              kopija (receive-all (fork game_channel) (fn[_])),
-	      rule_event_happened (check_rules partija igrac koordinate figura)
-	      ]
-          (when
-	      (or (not rule_event_happened)
-		  (and
-		   rule_event_happened
-		   kopija
-		   (not (or  (:invalid_move @partija) (:game_over @partija)))))
-	    (let [nova_tabla (place tabla figura koordinate) pre_promene @partija]
-	      (when nova_tabla
-		(dosync
-		 (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))}))))))))))
+      (let [game_uid (:game_uid @partija) , game_channel (@kanali game_uid)
+            kopija (receive-all (fork game_channel) (fn[_])),
+            rule_event_happened (check_rules partija igrac koordinate figura)
+            ]
+        (when
+            (or (not rule_event_happened)
+                (and
+                 rule_event_happened
+                 kopija
+                 (not (or  (:invalid_move @partija) (:game_over @partija)))))
+          (let [nova_tabla (place tabla figura koordinate) pre_promene @partija]
+            (when nova_tabla
+              (dosync
+               (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))}))))))))))
 
 
 (defn play-game [guid igrac {:keys [xfield, yfield,picsym]}]
   (let [partija (@igre (symbol guid))
 	figura_p (if picsym picsym ((@igraci igrac)0))]
-    (println (str "&&&&" guid ":" partija ":" xfield ":" yfield ":" igrac ":" figura_p))
     (play partija (kor xfield yfield) igrac figura_p))
   )
-
-
 
 (defn revert[partija]
   (dosync
@@ -182,7 +165,6 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
       (recur (zip/down pos))
       pos
       )))
-
 
 (defn review-play [review igrac koordinate figura]
   (let [played (play (zip/node review) koordinate igrac figura true)]
@@ -213,5 +195,3 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
   (let [[xb yb] (boards (keyword game))]
     {:xfield (int (* x xb)) , :yfield (int (* y yb))}
     ))
-
-

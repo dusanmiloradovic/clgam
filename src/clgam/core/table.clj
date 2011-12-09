@@ -23,7 +23,10 @@
       new_koords
       nil
       )))
-
+(defn popunjena-table[tabla]
+  (not
+   (some true? (map #(some nil? %) t))))
+  
 (defn kvadratna_tabla[n & pocetni_podaci]
   [(if pocetni_podaci
      pocetni_podaci
@@ -65,10 +68,6 @@
     (+ 1 (fja direction) (fja (opposite direction)))
     )
   )
-
-
-
-
 
 (defn diag_up_connected[tabla figura koordinate board_check]
   (connected_both tabla figura koordinate board_check (vec (map + up right))))
@@ -116,6 +115,20 @@
       :handler
       {:invalid_move true}
       
+      }
+     {
+      :event
+      (fn pop[igrac figura koordinate]
+        (popunjena-table tabla))
+      :handler
+      {:game_over true, :winner "draw"}
+      }
+     {
+     :event
+     (fn wrongppl[igrac figura koordinate]
+       (and (not (nil? (:sledeci_igrac @partija))) (not= (:sledeci_igrac @partija) igrac)))
+     :handler
+      {:invalid_move true :description "wrong player"}
       }
      ]
     )
