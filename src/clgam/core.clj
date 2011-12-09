@@ -142,7 +142,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
                  kopija
                  (not (or  (:invalid_move @partija) (:game_over @partija)))))
           (let [nova_tabla (place tabla figura koordinate) pre_promene @partija]
-            (dp
+            (do
              (when nova_tabla
                (dosync
                 (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))})))
