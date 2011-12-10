@@ -108,12 +108,12 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
   (when-let [poceta-igra (@igraci username)]
     [(poceta-igra 1) "tictactoe"]))
 
-(defn check_rules[partija igrac koordinate figura & validations?]
+(defn check_rules[partija igrac koordinate figura validations?]
   (let [ev_functions (:event_fx @partija)
         events-h (ev_functions partija)
-        events (if validations? (:validations events-h) (:events events-h))
         game_uid (:game_uid @partija)
         game_channel (game_uid @kanali)
+        events (if validations? (:validations events-h) (:events events-h))
         ]
     (not-empty
      (map #(enqueue game_channel %)
@@ -121,6 +121,13 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
                   (for [xxx events]
                     (when ((:event xxx) igrac figura koordinate)
                       (:handler xxx))))))))
+
+(defn check_rules_val [partija igrac koordinate figura]
+  (check_rules partija igrac koordinate figura true))
+
+(defn check_rules_ev [partija igrac koordinate figura]
+  (check_rules partija igrac koordinate figura false))
+
 (defn kor [x y]
   (struct-map koord :xcoord x :ycoord y))
 
@@ -133,7 +140,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
     (let [tabla (:tabla @partija) ]
       (let [game_uid (:game_uid @partija) , game_channel (@kanali game_uid)
             kopija (receive-all (fork game_channel) (fn[_])),
-            rule_event_happened (check_rules partija igrac koordinate figura true)
+            rule_event_happened (check_rules_val partija igrac koordinate figura)
             ]
         (when
             (or (not rule_event_happened)
@@ -146,7 +153,8 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
              (when nova_tabla
                (dosync
                 (alter partija merge {:tabla nova_tabla  :sledeci_igrac (next_player igrac (:igraci @partija)) :istorija_poteza (cons pre_promene (:istorija_poteza @partija))})))
-             (check_rules partija igrac koordinate figura false)
+             (check_rules_ev partija igrac koordinate figura)
+             true
              )))))))
 
 
