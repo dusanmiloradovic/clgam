@@ -140,12 +140,23 @@ za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da na
 			(let [game-invitations (c/get-game-invitations :soba :igra)]
 			  (j/json-str game-invitations)))
 		      )))
-		      
-		    
+
+
+(defn game-message-braodcast
+  "channels events and validations message to all the players and observers of the game"
+  [ch request]
+  "za sada cu staviti samo igru koju igram da posmatram, ali ce uskoro biti moguce da
+se igre i posmatraju, i za te korisnike treba da se salju poruke"
+  (let [username (:username (:session request))]
+    
+  )
+)		    
 
 
 (defn tictactoehandler_out [ch request]
-  (longpoll ch coords_inq))
+  (let [params (:params request)]
+    (println params)
+    (longpoll ch coords_inq)))
 
 (defn fillq [{params :params}]
   (let [val (params "val")]
@@ -172,7 +183,7 @@ za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da na
             ["poll"]
             (wrap-params (wrap-aleph-handler long-poll-handler))
 	    ["tictactoe"] (wrap-params play)
-	    ["fieldsout"] (wrap-aleph-handler tictactoehandler_out)
+	    ["fieldsout"] (wrap-params (wrap-aleph-handler tictactoehandler_out))
 	    ["login"] (wrap-params login-handler)
             ["pending"] (wrap-aleph-handler pending-invitations)
             ["startgame"] (wrap-params start-game-handler)
