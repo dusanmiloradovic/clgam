@@ -10,6 +10,7 @@ $(document).ready(function(){
 	    var jData=$.parseJSON(data);
 	    game_name=jData.game_name;
 	    guid=jData.guid;
+	    alert("Postavljam:"+guid);
 	}
 	      );
     });
@@ -53,9 +54,7 @@ function displayField(data){
 }
 
 function waitForMsg(){
-    if (guid==0){
-	return;
-    }
+
     $.ajax({
 	type: "GET",
 	url: "fieldsout",
@@ -65,8 +64,9 @@ function waitForMsg(){
 	timeout:50000, /* Timeout in ms */
 
 	success: function(d){ /* called when request to barge.php completes */
-	    
-	    displayField(d);
+	    if (guid!=0){
+		displayField(d);
+	    }
 	    waitForMsg();
 	},
 	error: function(XMLHttpRequest, textStatus, errorThrown){
