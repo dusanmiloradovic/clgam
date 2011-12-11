@@ -86,12 +86,12 @@ pomocu long-pollinga ili websocketa"
         params (:params request)
         [x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])
         game (gm 1)
-        board_fields (assoc (c/transfer-board-koords x y game) :picsym ((@c/igraci username) 0))
+        board_fields (merge (c/transfer-board-koords x y game) {:picsym ((@c/igraci username) 0) , :guid guid , :game_name game} )
         ]
     "kada imam samo jednu figuru po igracu, figure ce da se uzimaju iz difolta, inace ce iz js-a.
 necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
     (when-let [partija (c/play-game guid username board_fields )]
-      (enqueue coords_inq (j/json-str board_fields))
+      (enqueue coords_inq board_fields)
       )
   (empty-response)))
 
@@ -103,25 +103,14 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
     
 (def ulazniq (channel))
 
-(comment
-  (defn tictactoehandler_in [{params :params}]
-    (let [[x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])]
-      (enqueue coords_inq (j/json-str (c/transfer-board-koords x y "tictactoe")))
-      (empty-response)
-      ))
-  )
-
-
-
 (defn longpoll-general
   "boilerplate with the channel, queueue and the transformer function"
   [ch q f]
   (when(not (or (closed? ch) (closed? q)))
     (receive (fork q)
 	     (fn[x]
-		 (enqueue ch {:status 200, :headers {"content-type" "text/plain"}, :body (f x)})))))
-
-
+	       (when-let [f-rez (f x)]
+		 (enqueue ch {:status 200, :headers {"content-type" "text/plain"}, :body f-rez}))))))
 
 (defn longpoll 
   "common function for all long poll requests"
@@ -160,9 +149,12 @@ se igre i posmatraju, i za te korisnike treba da se salju poruke"
 
 
 (defn tictactoehandler_out [ch request]
-  (let [params (:params request)]
-    (println params)
-    (longpoll ch coords_inq)))
+  (let [params (:params request) , guid (symbol (params "game_uid") ),
+	filter (fn[x]
+		 (println (str ">>>>>>>>>>>>>>>>>" x))
+		 (when (= guid (:guid x)) (j/json-str x)))]
+    (println (str params "Guid" guid))
+    (longpoll-general ch coords_inq filter)))
 
 (defn fillq [{params :params}]
   (let [val (params "val")]
