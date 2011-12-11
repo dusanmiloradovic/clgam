@@ -2,28 +2,34 @@ var guid=0;
 var game_name;
 
 $(document).ready(function(){
-	$('#brdimg').click(function(e){
-		sendCoords(e,$(this));
-	    });
-	$('#sg123').click(function(e){
-		$.post("startgame",{game_name:"tictactoe"});
-	    });
-	loadSymbols();
-	waitForMsg();
-	waitForInvitations();
+    $('#brdimg').click(function(e){
+	sendCoords(e,$(this));
     });
+    $('#sg123').click(function(e){
+	$.post("startgame",{game_name:"tictactoe"}, function(data){
+	    var jData=$.parseJSON(data);
+	    game_name=jData.game_name;
+	    guid=jData.guid;
+	}
+	      );
+    });
+    loadSymbols();
+    waitForMsg();
+    waitForInvitations();
+//necu na init da stavim da mi se stranica postavi sa igru koju sam igrao, nego ca da postavim listu sa aktivnim igrama i igrama koje posmatram , pa ce on sam da odabere.
+});
 
 $(window).load(function (e){
-	$.board = {
-	    xsize:$('#brdimg').width(),
-	    ysize:$('#brdimg').height()
-	};
-    });
+    $.board = {
+	xsize:$('#brdimg').width(),
+	ysize:$('#brdimg').height()
+    };
+});
 
 function loadSymbols(){
     $.post("gamedef",{game_name:"tictactoe"}, function(data){
-	    $.symbols=$.parseJSON(data);
-	});
+	$.symbols=$.parseJSON(data);
+    });
 }
 function sendCoords(e,t){
     var x=e.pageX - t.offset().left;
@@ -42,8 +48,8 @@ function displayField(data){
     $("#polje_"+xField+"_"+yField).remove();
     obja=$("<div id='polje_"+xField+"_"+yField+"'> <img id='figimg' class='displayed' src='"+symbolURL+"' /> </div>");
     $("#igra").append(obja.css(
-			       {'width':($.board.xsize/3)+'px', 'height':($.board.ysize/3)+'px','position':'absolute','z-index':'1', 'left':(xDraw+'px'), 'top':(yDraw+'px')}
-			       ));
+	{'width':($.board.xsize/3)+'px', 'height':($.board.ysize/3)+'px','position':'absolute','z-index':'1', 'left':(xDraw+'px'), 'top':(yDraw+'px')}
+    ));
 }
 
 function waitForMsg(){
@@ -51,42 +57,42 @@ function waitForMsg(){
 	return;
     }
     $.ajax({
-	    type: "GET",
-		url: "fieldsout",
-		data:{game_uid:guid},
-		async: true, /* If set to non-async, browser shows page as "Loading.."*/
-		cache: false,
-		timeout:50000, /* Timeout in ms */
+	type: "GET",
+	url: "fieldsout",
+	data:{game_uid:guid},
+	async: true, /* If set to non-async, browser shows page as "Loading.."*/
+	cache: false,
+	timeout:50000, /* Timeout in ms */
 
-		success: function(d){ /* called when request to barge.php completes */
+	success: function(d){ /* called when request to barge.php completes */
 	    
-		displayField(d);
-		waitForMsg();
-	    },
-		error: function(XMLHttpRequest, textStatus, errorThrown){
-		waitForMsg();
-	    }
-	});
+	    displayField(d);
+	    waitForMsg();
+	},
+	error: function(XMLHttpRequest, textStatus, errorThrown){
+	    waitForMsg();
+	}
+    });
 }
 
 function waitForInvitations(){
     $.ajax({
-	    type: "GET",
-		url: "pending",
+	type: "GET",
+	url: "pending",
 
-		async: true, /* If set to non-async, browser shows page as "Loading.."*/
-		cache: false,
-		timeout:50000, /* Timeout in ms */
+	async: true, /* If set to non-async, browser shows page as "Loading.."*/
+	cache: false,
+	timeout:50000, /* Timeout in ms */
 
-		success: function(data){ /* called when request to barge.php completes */
+	success: function(data){ /* called when request to barge.php completes */
 	    
-		printInvitations(data);
-		waitForInvitations();
-	    },
-		error: function(XMLHttpRequest, textStatus, errorThrown){
-		waitForInvitations();
-	    }
-	});
+	    printInvitations(data);
+	    waitForInvitations();
+	},
+	error: function(XMLHttpRequest, textStatus, errorThrown){
+	    waitForInvitations();
+	}
+    });
 }
 
 

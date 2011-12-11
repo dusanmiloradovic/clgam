@@ -47,7 +47,8 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
                          (println (str "Received -----> " x))
 			 (when-let [igra (@igre game_id)]
 			   (dosync
-			    (alter igra #(merge % x))))))))))
+			    (alter igra #(merge % x))))))
+	game_id))))
 
 (defn place [tabla figura koordinate]
   "tabla je closure sa figurama  i funkcijom validacije polja"

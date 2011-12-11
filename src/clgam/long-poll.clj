@@ -52,8 +52,9 @@ pomocu long-pollinga ili websocketa"
 
 (defs start-new-game
   [request game_name]
-      (c/postavi_igru game_name (:username (:session request)))
-      (empty-response))
+  (if-let [game-uid (c/postavi_igru game_name (:username (:session request)))]
+    (-> (json-response {:guid game-uid :game game_name}) (assoc :session (merge (:session request) {:guid game-uid :game game_name})))
+    (empty-response)))
 
 (defn start-game-handler [{params :params :as request}]
   (start-new-game request (params "game_name"))
@@ -142,7 +143,7 @@ za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da na
 		      )))
 
 
-(defn game-message-braodcast
+(defn game-message-broadcast
   "channels events and validations message to all the players and observers of the game"
   [ch request]
   "za sada cu staviti samo igru koju igram da posmatram, ali ce uskoro biti moguce da
@@ -150,7 +151,12 @@ se igre i posmatraju, i za te korisnike treba da se salju poruke"
   (let [username (:username (:session request))]
     
   )
-)		    
+  )
+
+(defn get-game-session
+  "ovo se zove iz javascripta kada se stranica ucitava ili refresuje da se dobiju podaci iz sesije, username, igra koju trenutno igra igrac, koje igre posmatra, itd."
+  [ch request]
+  )
 
 
 (defn tictactoehandler_out [ch request]
