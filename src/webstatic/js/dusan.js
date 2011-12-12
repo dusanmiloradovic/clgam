@@ -11,11 +11,11 @@ $(document).ready(function(){
 	    game_name=jData.game_name;
 	    guid=jData.guid;
 	    alert("Postavljam:"+guid);
+	    waitForMsg();
 	}
 	      );
     });
     loadSymbols();
-    waitForMsg();
     waitForInvitations();
 //necu na init da stavim da mi se stranica postavi sa igru koju sam igrao, nego ca da postavim listu sa aktivnim igrama i igrama koje posmatram , pa ce on sam da odabere.
 });
@@ -64,6 +64,7 @@ function waitForMsg(){
 	timeout:50000, /* Timeout in ms */
 
 	success: function(d){ /* called when request to barge.php completes */
+
 	    if (guid!=0){
 		displayField(d);
 	    }
