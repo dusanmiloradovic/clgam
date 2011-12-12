@@ -10,7 +10,6 @@ $(document).ready(function(){
 	    var jData=$.parseJSON(data);
 	    game_name=jData.game_name;
 	    guid=jData.guid;
-	    alert("Postavljam:"+guid);
 	    waitForMsg();
 	}
 	      );
