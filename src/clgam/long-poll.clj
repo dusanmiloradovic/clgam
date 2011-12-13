@@ -80,7 +80,6 @@ pomocu long-pollinga ili websocketa"
 (receive-all coords_inq (fn[_]))
 
 (defs play [request]
-  (println "A ovde Da li me vidis?")
   (let [username (:username (:session request))
         gm (c/user_game username)
         guid (gm 0)
@@ -91,7 +90,6 @@ pomocu long-pollinga ili websocketa"
         ]
     "kada imam samo jednu figuru po igracu, figure ce da se uzimaju iz difolta, inace ce iz js-a.
 necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
-    (println "Da li me vidis?")
     (when-let [partija (c/play-game guid username board_fields )]
       (enqueue coords_inq board_fields)
       )
@@ -153,9 +151,7 @@ se igre i posmatraju, i za te korisnike treba da se salju poruke"
 (defn tictactoehandler_out [ch request]
   (let [params (:params request) , guid (symbol (params "game_uid") ),
 	filter (fn[x]
-		 (println (str ">>>>>>>>>>>>>>>>>" x))
 		 (when (= guid (:guid x)) (j/json-str x)))]
-    (println (str params "Guid" guid))
     (longpoll-general ch coords_inq filter)))
 
 (defn fillq [{params :params}]

@@ -33,15 +33,6 @@ function loadSymbols(){
 	$.symbols=$.parseJSON(data);
     });
 }
-function sendCoords_old(e,t){
-    var x=e.pageX - t.offset().left;
-    var y=e.pageY - t.offset().top;
-    alert ("sending the coordinates"+x+":"+y);
-    $.post("tictactoe",{xcoord:x/$.board.xsize, ycoord:y/$.board.ysize}, function(data){
-	alert("Received the response");
-    }
-);
-}
 
 function sendCoords(e,t){
     var x=e.pageX - t.offset().left;
@@ -49,14 +40,12 @@ function sendCoords(e,t){
 
     var xrel=x/$.board.xsize;
     var yrel=y/$.board.ysize;
-    alert ("@sending the coordinates"+xrel+":"+yrel);
     $.ajax({
 	type: "POST",
         cache: false,
 	url:"tictactoe",
 	data:{xcoord:xrel, ycoord:yrel},
 	sucess: function(d){
-	    alert("Received the response");
 	},
 	error: function(XMLHttpRequest, textStatus, errorThrown){
 	    alert("Error in response"+textStatus+":"+errorThrown);
@@ -104,13 +93,16 @@ function waitForMsg(){
 }
 
 function waitForInvitations(){
+    if (guid!=0){
+	return;
+    }
     $.ajax({
 	type: "GET",
 	url: "pending",
 
 	async: true, /* If set to non-async, browser shows page as "Loading.."*/
 	cache: false,
-	timeout:50000, /* Timeout in ms */
+	timeout:5000, /* Timeout in ms */
 
 	success: function(data){ /* called when request to barge.php completes */
 	    
