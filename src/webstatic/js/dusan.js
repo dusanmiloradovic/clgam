@@ -2,6 +2,8 @@ var guid=0;
 var game_name;
 
 $(document).ready(function(){
+$.ajaxSetup({ cache: false });
+
     $('#brdimg').click(function(e){
 	sendCoords(e,$(this));
     });
@@ -31,10 +33,36 @@ function loadSymbols(){
 	$.symbols=$.parseJSON(data);
     });
 }
+function sendCoords_old(e,t){
+    var x=e.pageX - t.offset().left;
+    var y=e.pageY - t.offset().top;
+    alert ("sending the coordinates"+x+":"+y);
+    $.post("tictactoe",{xcoord:x/$.board.xsize, ycoord:y/$.board.ysize}, function(data){
+	alert("Received the response");
+    }
+);
+}
+
 function sendCoords(e,t){
     var x=e.pageX - t.offset().left;
     var y=e.pageY - t.offset().top;
-    $.post("tictactoe",{xcoord:x/$.board.xsize, ycoord:y/$.board.ysize});
+
+    var xrel=x/$.board.xsize;
+    var yrel=y/$.board.ysize;
+    alert ("@sending the coordinates"+xrel+":"+yrel);
+    $.ajax({
+	type: "POST",
+        cache: false,
+	url:"tictactoe",
+	data:{xcoord:xrel, ycoord:yrel},
+	sucess: function(d){
+	    alert("Received the response");
+	},
+	error: function(XMLHttpRequest, textStatus, errorThrown){
+	    alert("Error in response"+textStatus+":"+errorThrown);
+	}
+    });
+    
 }
 
 function displayField(data){
