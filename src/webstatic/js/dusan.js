@@ -12,12 +12,11 @@ $(document).ready(function(){
 	    var jData=$.parseJSON(data);
 	    game_name=jData.game_name;
 	    guid=jData.guid;
-	    waitForMsg();
 	}
 	      );
     });
     loadSymbols();
-    waitForInvitations();
+    longpoll();
     //necu na init da stavim da mi se stranica postavi sa igru koju sam igrao, nego ca da postavim listu sa aktivnim igrama i igrama koje posmatram , pa ce on sam da odabere.
 });
 
@@ -61,7 +60,7 @@ function displayField(data){
     //var jData=$.parseJSON(data);
     var xField=data.xfield;
     var yField=data.yfield;
-    var symbol=jData.picsym;
+    var symbol=data.picsym;
     var symbolURL=$.symbols[symbol];
     var xDraw=xField* ($.board.xsize/3);
     var yDraw=yField* ($.board.ysize/3);
@@ -126,14 +125,13 @@ function joinGame(sGameName,sGameUid){
 	   function(data){
 	       $("igra").show();
 	   });
-    waitForMsg();
 }
 
 function printInvitations(data){
     //var jData=$.parseJSON(data);
     var invitations="";
     for (var prop in data){
-	var val=jData[prop];
+	var val=data[prop];
 	invitations+="<a href=# onclick='joinGame(\"tictactoe\",\""+prop+"\");'>"+val+"</a><br/>";
     }
     $("#opengames").html(invitations);

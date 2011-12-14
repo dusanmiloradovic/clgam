@@ -111,7 +111,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 
 (defn check_rules[partija igrac koordinate figura validations?]
   (let [ev_functions (:event_fx @partija)
-        events-h (ev_functions partija)
+        events-h (ev_functions partija igrac)
         game_uid (:game_uid @partija)
         game_channel (game_uid @kanali)
         events (if validations? (:validations events-h) (:events events-h))

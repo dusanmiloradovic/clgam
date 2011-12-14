@@ -89,7 +89,7 @@
       (println x)))
   )
 
-(defn tictactoeevents[partija]
+(defn tictactoeevents[partija igrac]
   (let [tabla (first (:tabla @partija)) , ttboard-f (fnext (:tabla @partija))]
     {:validations
      [
