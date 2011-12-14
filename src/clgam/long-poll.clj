@@ -185,16 +185,12 @@ keep just one longpolling request open, and all the messages should come back th
             (wrap-content-type)
 	    (wrap-session)
             ["queuein"] (wrap-params fillq)
-            ["poll"]
-            (wrap-params (wrap-aleph-handler long-poll-handler))
 	    ["tictactoe"] (wrap-params play)
-	    ["fieldsout"] (wrap-params (wrap-aleph-handler tictactoehandler_out))
 	    ["login"] (wrap-params login-handler)
-            ["pending"] (wrap-aleph-handler pending-invitations)
             ["startgame"] (wrap-params start-game-handler)
             ["joingame"] (wrap-params join-game-handler)
 	    ["gamedef"] (wrap-params get-game-definition)
-	    ["longpoll"](wrap-aleph-handler all-longpoll-out)
+	    ["longpoll"](wrap-params (wrap-aleph-handler all-longpoll-out))
             ))
 
 (defonce stop (start-http-server (wrap-ring-handler #'ruter) {:port 8080}))

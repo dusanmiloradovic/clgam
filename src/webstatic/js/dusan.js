@@ -58,9 +58,9 @@ function displayField(data){
     if (guid==0){
 	return;
     }
-    var jData=$.parseJSON(data);
-    var xField=jData.xfield;
-    var yField=jData.yfield;
+    //var jData=$.parseJSON(data);
+    var xField=data.xfield;
+    var yField=data.yfield;
     var symbol=jData.picsym;
     var symbolURL=$.symbols[symbol];
     var xDraw=xField* ($.board.xsize/3);
@@ -116,9 +116,9 @@ function joinGame(sGameName,sGameUid){
 }
 
 function printInvitations(data){
-    var jData=$.parseJSON(data);
+    //var jData=$.parseJSON(data);
     var invitations="";
-    for (var prop in jData){
+    for (var prop in data){
 	var val=jData[prop];
 	invitations+="<a href=# onclick='joinGame(\"tictactoe\",\""+prop+"\");'>"+val+"</a><br/>";
     }
