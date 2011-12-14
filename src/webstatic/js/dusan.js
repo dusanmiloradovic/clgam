@@ -55,6 +55,9 @@ function sendCoords(e,t){
 }
 
 function displayField(data){
+    if (guid==0){
+	return;
+    }
     var jData=$.parseJSON(data);
     var xField=jData.xfield;
     var yField=jData.yfield;
@@ -69,48 +72,29 @@ function displayField(data){
     ));
 }
 
-function waitForMsg(){
-
+function longpoll (){
     $.ajax({
 	type: "GET",
-	url: "fieldsout",
+	url: "longpoll",
 	data:{game_uid:guid},
-	async: true, /* If set to non-async, browser shows page as "Loading.."*/
+	async: true,
 	cache: false,
 	timeout:50000, /* Timeout in ms */
 
-	success: function(d){ /* called when request to barge.php completes */
-
-	    if (guid!=0){
-		displayField(d);
+	success: function(d){
+	    var jData=$.parseJSON(d);
+	    for (var key in jData){
+		if (key=="invitations"){
+		    printInvitations (jData[key]);
+		}
+		if (key=="fieldsout"){
+		    displayField (jData[key]);
 	    }
-	    waitForMsg();
-	},
-	error: function(XMLHttpRequest, textStatus, errorThrown){
-	    waitForMsg();
-	}
-    });
-}
-
-function waitForInvitations(){
-    if (guid!=0){
-	return;
-    }
-    $.ajax({
-	type: "GET",
-	url: "pending",
-
-	async: true, /* If set to non-async, browser shows page as "Loading.."*/
-	cache: false,
-	timeout:5000, /* Timeout in ms */
-
-	success: function(data){ /* called when request to barge.php completes */
 	    
-	    printInvitations(data);
-	    waitForInvitations();
+	    longpoll();
 	},
 	error: function(XMLHttpRequest, textStatus, errorThrown){
-	    waitForInvitations();
+	    longpoll();
 	}
     });
 }

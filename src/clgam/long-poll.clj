@@ -60,7 +60,6 @@ pomocu long-pollinga ili websocketa"
   (start-new-game request (params "game_name"))
   )
 
- 
 (defs join_game [request game_name game]
   (if
       (c/join_game (symbol game) (:username (:session request)))
@@ -128,7 +127,7 @@ za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da na
 		      (fn[x]
 			"funkcija body"
 			(let [game-invitations (c/get-game-invitations :soba :igra)]
-			  (j/json-str game-invitations)))
+			  (j/json-str {:invitations game-invitations})))
 		      )))
 
 
@@ -151,8 +150,18 @@ se igre i posmatraju, i za te korisnike treba da se salju poruke"
 (defn tictactoehandler_out [ch request]
   (let [params (:params request) , guid (symbol (params "game_uid") ),
 	filter (fn[x]
-		 (when (= guid (:guid x)) (j/json-str x)))]
+		 (when (= guid (:guid x)) (j/json-str {:fieldsout x})))]
     (longpoll-general ch coords_inq filter)))
+
+(defn all-longpoll-out
+  "There is limitation in Internet explorer- 2 request at the same time. That means we have to
+keep just one longpolling request open, and all the messages should come back through the conforming channel. Client will distinguish the messages based on the key of the JSON object."
+  [ch request]
+  (do
+    (tictactoehandler_out ch request)
+    (game-message-broadcast ch request)
+    (pending-invitations ch request)
+    ))
 
 (defn fillq [{params :params}]
   (let [val (params "val")]
@@ -185,6 +194,7 @@ se igre i posmatraju, i za te korisnike treba da se salju poruke"
             ["startgame"] (wrap-params start-game-handler)
             ["joingame"] (wrap-params join-game-handler)
 	    ["gamedef"] (wrap-params get-game-definition)
+	    ["longpoll"](wrap-aleph-handler all-longpoll-out)
             ))
 
 (defonce stop (start-http-server (wrap-ring-handler #'ruter) {:port 8080}))
