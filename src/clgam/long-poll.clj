@@ -136,10 +136,18 @@ za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da na
   [ch request]
   "za sada cu staviti samo igru koju igram da posmatram, ali ce uskoro biti moguce da
 se igre i posmatraju, i za te korisnike treba da se salju poruke"
-  (let [username (:username (:session request))]
-    
-  )
-  )
+  (let [username (:username (:session request))
+	params (:params request) , guid (symbol (params "game_uid") )
+	kanal (@c/kanali guid)]
+    (when kanal
+      (longpoll-general ch kanal
+			(fn [x]
+			  (if-let [player (and (:invalid_move x) (:player x))]
+			    (when (= username player)
+			      (j/json-str {:invalid_move x}))
+			    (j/json-str {:event x})))))))
+
+
 
 (defn get-game-session
   "ovo se zove iz javascripta kada se stranica ucitava ili refresuje da se dobiju podaci iz sesije, username, igra koju trenutno igra igrac, koje igre posmatra, itd."

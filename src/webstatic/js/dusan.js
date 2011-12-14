@@ -2,7 +2,7 @@ var guid=0;
 var game_name;
 
 $(document).ready(function(){
-$.ajaxSetup({ cache: false });
+    $.ajaxSetup({ cache: false });
 
     $('#brdimg').click(function(e){
 	sendCoords(e,$(this));
@@ -18,7 +18,7 @@ $.ajaxSetup({ cache: false });
     });
     loadSymbols();
     waitForInvitations();
-//necu na init da stavim da mi se stranica postavi sa igru koju sam igrao, nego ca da postavim listu sa aktivnim igrama i igrama koje posmatram , pa ce on sam da odabere.
+    //necu na init da stavim da mi se stranica postavi sa igru koju sam igrao, nego ca da postavim listu sa aktivnim igrama i igrama koje posmatram , pa ce on sam da odabere.
 });
 
 $(window).load(function (e){
@@ -72,7 +72,7 @@ function displayField(data){
     ));
 }
 
-function longpoll (){
+function  longpoll (){
     $.ajax({
 	type: "GET",
 	url: "longpoll",
@@ -89,14 +89,28 @@ function longpoll (){
 		}
 		if (key=="fieldsout"){
 		    displayField (jData[key]);
+		}
+		if (key=="invalid_move"){
+		    invalidMove(jData[key]);
+		}
+		if (key=="event"){
+		    displayEvent(jData[key]);
+		}
 	    }
-	    
 	    longpoll();
 	},
 	error: function(XMLHttpRequest, textStatus, errorThrown){
 	    longpoll();
 	}
     });
+}
+
+function invalidMove(message){
+    alert("Invalid move "+message);
+}
+
+function displayEvent(message){
+    alert(message);
 }
 
 

@@ -101,14 +101,14 @@
           )
          )
        :handler
-       {:invalid_move true}
+       {:invalid_move true :description "field occupied" :player igrac}
        }
       {
        :event
        (fn wrongppl[igrac figura koordinate]
          (and (not (nil? (:sledeci_igrac @partija))) (not= (:sledeci_igrac @partija) igrac)))
        :handler
-       {:invalid_move true :description "wrong player"}
+       {:invalid_move true :description "wrong player" :player igrac}
        } 
       ],
      :events
