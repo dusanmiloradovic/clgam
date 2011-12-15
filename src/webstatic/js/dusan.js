@@ -54,9 +54,9 @@ function sendCoords(e,t){
 }
 
 function displayField(data){
-    if (guid==0){
-	return;
-    }
+    //if (guid==0){
+//	return;
+  //  }
     //var jData=$.parseJSON(data);
     var xField=data.xfield;
     var yField=data.yfield;
@@ -71,6 +71,13 @@ function displayField(data){
     ));
 }
 
+function prJSON(data){
+    var str="";
+    for (var key in data){
+	str+=key+":"+data[key]+" ";
+    }
+    return str;
+}
 function  longpoll (){
     $.ajax({
 	type: "GET",
@@ -105,11 +112,11 @@ function  longpoll (){
 }
 
 function invalidMove(message){
-    alert("Invalid move "+message);
+    alert("Invalid move "+prJSON(message));
 }
 
 function displayEvent(message){
-    alert(message);
+    //alert(prJSON(message));
 }
 
 

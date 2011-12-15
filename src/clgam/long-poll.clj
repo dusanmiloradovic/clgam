@@ -90,7 +90,10 @@ pomocu long-pollinga ili websocketa"
     "kada imam samo jednu figuru po igracu, figure ce da se uzimaju iz difolta, inace ce iz js-a.
 necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
     (when-let [partija (c/play-game guid username board_fields )]
-      (enqueue coords_inq board_fields)
+      (do
+	(println "Usao sam ovde")
+	(enqueue coords_inq board_fields)
+	)
       )
     (empty-response)))
 
