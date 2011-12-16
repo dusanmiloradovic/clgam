@@ -35,17 +35,7 @@ pomocu long-pollinga ili websocketa"
 
 (comment Kasnije ce da se naravno napravi pravi login modul)
 
-(defn login [username site session]
-  "za sada cu da zanemarim sajt, ali kasnije ce da se svako loguje na svoj"
-  (when (contains?  igraci username)
-    (do
-      (c/dodeli-kanal username)
-      (tictactoehandler-out username)
-      (game-message-broadcast username)
-      (pending-invitations username)
-      (assoc session :username username)
-      )
-    ))
+
 
 (defmacro with-session [request & body]
   `(let [session# (:session ~request)]
@@ -103,11 +93,7 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
       )
     (empty-response)))
 
-(defn login-handler [{params :params , session :session}]
-  (if-let [sess(login (params "username") :firstsite session)]
-    (-> (r/redirect
-	 "/testajax.html") (assoc :session sess))
-    (r/redirect "/login.html?err=loginfailed")))
+
     
 (def ulazniq (channel))
 
@@ -160,14 +146,36 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
 		 (when (= game-id (:guid x)) (j/json-str {:guid game-id, :fieldsout x})))]
     (longpoll-general kanal coords_inq filter)))
 
+(defn login [username site session]
+  "za sada cu da zanemarim sajt, ali kasnije ce da se svako loguje na svoj"
+  (when (contains?  igraci username)
+    (do
+      (println "Usao u login")
+      (c/dodeli-kanal username)
+      (tictactoehandler-out username)
+      (game-message-broadcast username)
+      (pending-invitations username)
+      (assoc session :username username)
+      )
+    ))
+(defn login-handler [{params :params , session :session}]
+  (if-let [sess(login (params "username") :firstsite session)]
+    (-> (r/redirect
+	 "/testajax.html") (assoc :session sess))
+    (r/redirect "/login.html?err=loginfailed")))
+
 (defn all-longpoll-out
   "There is limitation in Internet explorer- 2 request at the same time. That means we have to
 keep just one longpolling request open, and all the messages should come back through the conforming channel. Client will distinguish the messages based on the key of the JSON object.
 Additonaly, in order not to lose  messages, each player will have one lamina channel when logged in. All the messages will be read from that channel"
   [ch request]
-  (let [params (:params request), username (:username params)
+  (let [params (:params request), sess (:session request),
+        username (:username sess),
         user-channel (:kanal (@c/igraci username))]
-    (siphon user-channel ch)))
+      (println params)
+    (if user-channel
+      (siphon user-channel ch)
+      (println "User channel je nil!~"))))
   
 (defn fillq [{params :params}]
   (let [val (params "val")]

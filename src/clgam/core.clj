@@ -27,7 +27,7 @@
 		(set (filter (comp not keyword?) (keys @soba)))
 		(set (keys @igre)))))
 
-(receive-all (:game-list-channel @soba) (fn[x] (println str ("Game list channel event" x))))
+(receive-all (:game-list-channel @soba) (fn[x] (println (str "Game list channel event" x))))
 
 (defn dodeli-kanal
   "svaki igrac mora da ima lamina kanal, inace je moguce da se izgube poruke izmedju 2
