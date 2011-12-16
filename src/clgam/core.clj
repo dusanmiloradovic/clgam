@@ -27,7 +27,7 @@
 		(set (filter (comp not keyword?) (keys @soba)))
 		(set (keys @igre)))))
 
-(receive-all (:game-list-channel @soba) (fn[x] ))
+(receive-all (:game-list-channel @soba) (fn[x] (println str ("Game list channel event" x))))
 
 (defn dodeli-kanal
   "svaki igrac mora da ima lamina kanal, inace je moguce da se izgube poruke izmedju 2
@@ -40,7 +40,7 @@ longpoll poziva"
 (defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
   [igra username]
-  (when-not (@igraci username)
+  (when-not (:plays (@igraci username))
     "ovo ce biti ok kada imam samo jednu igru. za vise igara treba da
 proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise od jedne igre, razmislicu"
     (let [game_id (gensym) , figura (random_igrac) , c (channel)]
