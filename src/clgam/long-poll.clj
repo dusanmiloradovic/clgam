@@ -38,7 +38,13 @@ pomocu long-pollinga ili websocketa"
 (defn login [username site session]
   "za sada cu da zanemarim sajt, ali kasnije ce da se svako loguje na svoj"
   (when (contains?  igraci username)
-    (assoc session :username username)
+    (do
+      (c/dodeli-kanal username)
+      (tictactoehandler-out username)
+      (game-message-broadcast username)
+      (pending-invitations username)
+      (assoc session :username username)
+      )
     ))
 
 (defmacro with-session [request & body]
@@ -85,7 +91,7 @@ pomocu long-pollinga ili websocketa"
         params (:params request)
         [x y] (map #(Double/parseDouble %) [(params "xcoord") (params "ycoord")])
         game (gm 1)
-        board_fields (merge (c/transfer-board-koords x y game) {:picsym ((@c/igraci username) 0) , :guid guid , :game_name game} )
+        board_fields (merge (c/transfer-board-koords x y game) {:picsym (:figura (@c/igraci username)) , :guid guid , :game_name game} )
         ]
     "kada imam samo jednu figuru po igracu, figure ce da se uzimaju iz difolta, inace ce iz js-a.
 necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
@@ -109,7 +115,7 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
   "boilerplate with the channel, queueue and the transformer function"
   [ch q f]
   (when(not (or (closed? ch) (closed? q)))
-    (receive (fork q)
+    (receive-all (fork q)
 	     (fn[x]
 	       (when-let [f-rez (f x)]
 		 (enqueue ch {:status 200, :headers {"content-type" "text/plain"}, :body f-rez}))))))
@@ -119,61 +125,50 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
   [ch q]
   (longpoll-general ch q identity))
 
-(defn pending-invitations
-  "read pending game invitations. queue is just a trigger"
-  [ch request]
-  "ideja je da ako je neka igra pocela, a ja sam je startovao (ili se pridruzrio pre nego sto je pocela
-za igre sa >=3 igraca da mi se u sesiju upise ime igre i guid da bih mogao da nastavim"
-  (let [username (:username (:session request))
-	sess (:session request)]
-    (longpoll-general ch (:game-list-channel @c/soba)
+(defn pending-invitations [username]
+  (let [kanal (:kanal (@c/igraci username))]
+    (longpoll-general kanal (:game-list-channel @c/soba)
 		      (fn[x]
 			"funkcija body"
 			(let [game-invitations (c/get-game-invitations :soba :igra)]
 			  (j/json-str {:invitations game-invitations})))
 		      )))
 
-
-(defn game-message-broadcast
-  "channels events and validations message to all the players and observers of the game"
-  [ch request]
-  "za sada cu staviti samo igru koju igram da posmatram, ali ce uskoro biti moguce da
-se igre i posmatraju, i za te korisnike treba da se salju poruke"
-  (let [username (:username (:session request))
-	params (:params request) , guid (symbol (params "game_uid") )
-	kanal (@c/kanali guid)]
-    (when kanal
-      (longpoll-general ch kanal
+(defn game-message-broadcast [username]
+  (let [kanal (:kanal (@c/igraci username)),
+        game-id (:plays (@c/igraci username))
+        game-channel (@c/kanali game-id)
+        ]
+    (when game-channel
+      (longpoll-general kanal game-channel
 			(fn [x]
 			  (if-let [player (and (:invalid_move x) (:player x))]
 			    (when (= username player)
-			      (j/json-str {:invalid_move x}))
-			    (j/json-str {:event x})))))))
-
-
+			      (j/json-str {:game-uid game-id ,:invalid_move x}))
+			    (j/json-str {:game-uid game-id , :event x})))))))
+      
 
 (defn get-game-session
   "ovo se zove iz javascripta kada se stranica ucitava ili refresuje da se dobiju podaci iz sesije, username, igra koju trenutno igra igrac, koje igre posmatra, itd."
   [ch request]
   )
 
-
-(defn tictactoehandler_out [ch request]
-  (let [params (:params request) , guid (symbol (params "game_uid") ),
-	filter (fn[x]
-		 (when (= guid (:guid x)) (j/json-str {:fieldsout x})))]
-    (longpoll-general ch coords_inq filter)))
+(defn tictactoehandler-out [username]
+  (let [kanal (:kanal (@c/igraci username)),
+        game-id (:plays (@c/igraci username))
+        filter (fn[x]
+		 (when (= game-id (:guid x)) (j/json-str {:guid game-id, :fieldsout x})))]
+    (longpoll-general kanal coords_inq filter)))
 
 (defn all-longpoll-out
   "There is limitation in Internet explorer- 2 request at the same time. That means we have to
-keep just one longpolling request open, and all the messages should come back through the conforming channel. Client will distinguish the messages based on the key of the JSON object."
+keep just one longpolling request open, and all the messages should come back through the conforming channel. Client will distinguish the messages based on the key of the JSON object.
+Additonaly, in order not to lose  messages, each player will have one lamina channel when logged in. All the messages will be read from that channel"
   [ch request]
-  (do
-    (tictactoehandler_out ch request)
-    (game-message-broadcast ch request)
-    (pending-invitations ch request)
-    ))
-
+  (let [params (:params request), username (:username params)
+        user-channel (:kanal (@c/igraci username))]
+    (siphon user-channel ch)))
+  
 (defn fillq [{params :params}]
   (let [val (params "val")]
      (enqueue ulazniq val)
@@ -182,8 +177,6 @@ keep just one longpolling request open, and all the messages should come back th
   )
 
 (receive-all ulazniq (fn[x] (println "praznim" x)))
-
-
 
 (defn long-poll-handler [ch request]
   (longpoll ch ulazniq)

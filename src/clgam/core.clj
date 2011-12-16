@@ -29,6 +29,14 @@
 
 (receive-all (:game-list-channel @soba) (fn[x] ))
 
+(defn dodeli-kanal
+  "svaki igrac mora da ima lamina kanal, inace je moguce da se izgube poruke izmedju 2
+longpoll poziva"
+  [username]
+  (dosync
+   (alter igraci assoc username (assoc (@igraci username) :kanal (channel)))))
+
+
 (defn postavi_igru
   "prvo cu da stavim uid kao system.currenttime, a posle cu da cuvam sekvencu u bazi"
   [igra username]
@@ -39,7 +47,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
       (do
 	(dosync
 	 (alter soba assoc game_id (list username))
-	 (alter igraci assoc username [figura game_id])
+	 (alter igraci assoc username (merge (@igraci username) {:figura figura :plays game_id}))
 	 (alter kanali assoc game_id c)
 	 )
 	(enqueue (:game-list-channel @soba) [game_id username])
@@ -88,7 +96,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
   "Kada je igra postavljena ceka se da se prijavi dovoljan broj igraca.(za iks oks jos samo jedan. Kada su svi prijavljeni, treba startovati igru i prodruziti joj game_uid"
   [game_uid username]
   (let [svi_igraci (cons username (@soba game_uid))
-	zauzete_figure (map #((% 1)0) (select-keys @igraci (@soba game_uid)))
+	zauzete_figure (map #(:figura (% 1)) (select-keys @igraci (@soba game_uid)))
 	figura (random_igrac zauzete_figure)
 	]
     (when (and figura (not (some #(= username %) (@soba game_uid))))
@@ -98,7 +106,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 	 (when (and (@igraci username) (@soba ((@igraci username) 1)))
 	   (alter soba dissoc ((@igraci username) 1)))
 	 (alter soba assoc game_uid (cons username (@soba game_uid)))
-	 (alter igraci assoc username [figura game_uid])
+         (alter igraci assoc username (merge (@igraci username) {:figura figura :plays game_uid}))
 	 (when (= (count svi_igraci) 2)
 	   (alter igre assoc game_uid (startuj-partiju svi_igraci tictactoeboard tictactoeevents game_uid)))
 	 )
@@ -107,7 +115,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 
 (defn user_game [username]
   (when-let [poceta-igra (@igraci username)]
-    [(poceta-igra 1) "tictactoe"]))
+    [(:plays poceta-igra) "tictactoe"]))
 
 (defn check_rules[partija igrac koordinate figura validations?]
   (let [ev_functions (:event_fx @partija)
@@ -161,7 +169,7 @@ proverim i koju igru igra, mada u principu ne bi trebalo da moze da postavi vise
 
 (defn play-game [guid igrac {:keys [xfield, yfield,picsym]}]
   (let [partija (@igre (symbol guid))
-	figura_p (if picsym picsym ((@igraci igrac)0))]
+	figura_p (if picsym picsym (:figura (@igraci igrac)))]
     (play partija (kor xfield yfield) igrac figura_p))
   )
 
