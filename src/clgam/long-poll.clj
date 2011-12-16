@@ -1,4 +1,3 @@
-
 (ns clgam.long-poll
   (:use aleph.core lamina.core aleph.http)
   (:use [net.cgrand.moustache :only [app]])
@@ -143,6 +142,7 @@ necu sada da ulazim udetalje, ovo ce da se izmeni kada budem radio sah"
   (let [kanal (:kanal (@c/igraci username)),
         game-id (:plays (@c/igraci username))
         filter (fn[x]
+                 (println (str "Kao da nesto nije u redu" x))
 		 (when (= game-id (:guid x)) (j/json-str {:guid game-id, :fieldsout x})))]
     (longpoll-general kanal coords_inq filter)))
 

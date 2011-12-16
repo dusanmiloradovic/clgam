@@ -88,6 +88,7 @@ function  longpoll (){
 	timeout:50000, /* Timeout in ms */
 
 	success: function(d){
+		alert(d);
 	    var jData=$.parseJSON(d);
 	    for (var key in jData){
 		if (key=="invitations"){
