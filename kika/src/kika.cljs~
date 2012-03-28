@@ -1,0 +1,16 @@
+(ns kika
+  (:require [clojure.browser.repl :as repl]
+            [enfocus.core :as ef]
+            [goog.dom :as dom])
+  (:require-macros [enfocus.macros :as em]))
+
+(defn dusan[x]
+  (+ 1 x))
+(defn kika [x]
+  (js/alert x))
+
+(repl/connect "http://localhost:9000/repl")
+
+(defn start2[c]
+    (em/at js/document
+           ["body"] (em/content c)))
